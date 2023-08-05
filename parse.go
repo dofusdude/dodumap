@@ -110,15 +110,8 @@ func PersistElements(elementPath string, itemTypePath string) error {
 	return nil
 }
 
-func Parse(dir string, indentFlag bool) {
+func Parse(dir string, indent string) {
 	log.Info("Parsing...")
-
-	var indent string
-	if indentFlag {
-		indent = "    "
-	} else {
-		indent = ""
-	}
 
 	startParsing := time.Now()
 	gameData := ParseRawData(dir)

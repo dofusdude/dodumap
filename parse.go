@@ -3,6 +3,8 @@ package dodumap
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -25,43 +27,78 @@ var (
 	PersistedTypes    PersistentStringKeysMap
 )
 
-func LoadPersistedElements(dir string) error {
+func LoadPersistedElements(persistenceDir string) error {
 	var element_path string
 	var item_type_path string
 
-	element_path = filepath.Join(dir, "persistent", "elements.json")
-	item_type_path = filepath.Join(dir, "persistent", "item_types.json")
-
-	data, err := os.ReadFile(element_path)
-	if err != nil {
-		return err
-	}
-
 	var elements []string
-	err = json.Unmarshal(data, &elements)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	PersistedElements = PersistentStringKeysMap{
-		Entries: treebidimap.NewWith(gutils.IntComparator, gutils.StringComparator),
-		NextId:  0,
-	}
-
-	for _, entry := range elements {
-		PersistedElements.Entries.Put(PersistedElements.NextId, entry)
-		PersistedElements.NextId++
-	}
-
-	data, err = os.ReadFile(item_type_path)
-	if err != nil {
-		return err
-	}
-
 	var types []string
-	err = json.Unmarshal(data, &types)
-	if err != nil {
-		fmt.Println(err)
+	if persistenceDir == "" {
+		elementUrl := "https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/elements.json"
+		elementResponse, err := http.Get(elementUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		elementBody, err := io.ReadAll(elementResponse.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = json.Unmarshal(elementBody, &elements)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		itemTypeUrl := "https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/item_types.json"
+		itemTypeResponse, err := http.Get(itemTypeUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		itemTypeBody, err := io.ReadAll(itemTypeResponse.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = json.Unmarshal(itemTypeBody, &types)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else {
+		element_path = filepath.Join(persistenceDir, "elements.json")
+		item_type_path = filepath.Join(persistenceDir, "item_types.json")
+
+		data, err := os.ReadFile(element_path)
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(data, &elements)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		PersistedElements = PersistentStringKeysMap{
+			Entries: treebidimap.NewWith(gutils.IntComparator, gutils.StringComparator),
+			NextId:  0,
+		}
+
+		for _, entry := range elements {
+			PersistedElements.Entries.Put(PersistedElements.NextId, entry)
+			PersistedElements.NextId++
+		}
+
+		data, err = os.ReadFile(item_type_path)
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(data, &types)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	PersistedTypes = PersistentStringKeysMap{
@@ -110,7 +147,7 @@ func PersistElements(elementPath string, itemTypePath string) error {
 	return nil
 }
 
-func Parse(dir string, indent string) {
+func Parse(dir string, indent string, persistenceDir string) {
 	log.Info("Parsing...")
 
 	startParsing := time.Now()
@@ -119,7 +156,7 @@ func Parse(dir string, indent string) {
 	log.Infof("... %.2fs", time.Since(startParsing).Seconds())
 
 	startMapping := time.Now()
-	err := LoadPersistedElements(dir)
+	err := LoadPersistedElements(persistenceDir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -194,9 +231,11 @@ func Parse(dir string, indent string) {
 	outRecipes.Write(outRecipeBytes)
 	log.Infof("📁 %s", mappedRecipesPath)
 
-	err = PersistElements(filepath.Join(dir, "persistent", "elements.json"), filepath.Join(dir, "persistent", "item_types.json"))
-	if err != nil {
-		log.Fatal(err)
+	if persistenceDir != "" {
+		err = PersistElements(filepath.Join(persistenceDir, "elements.json"), filepath.Join(persistenceDir, "item_types.json"))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	log.Infof("... %.2fs", time.Since(startMapping).Seconds())

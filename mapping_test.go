@@ -3,6 +3,7 @@ package dodumap
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -16,7 +17,7 @@ func TestMain(m *testing.M) {
 	}
 	TestingLangs = ParseRawLanguages(path)
 	TestingData = ParseRawData(path)
-	LoadPersistedElements(path)
+	LoadPersistedElements(filepath.Join(path, "persistent"))
 
 	if TestingLangs == nil {
 		log.Fatal("testingLangs is nil")

@@ -65,7 +65,6 @@ func LoadPersistedElements(persistenceDir string) error {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 	} else {
 		element_path = filepath.Join(persistenceDir, "elements.json")
 		item_type_path = filepath.Join(persistenceDir, "item_types.json")
@@ -80,16 +79,6 @@ func LoadPersistedElements(persistenceDir string) error {
 			fmt.Println(err)
 		}
 
-		PersistedElements = PersistentStringKeysMap{
-			Entries: treebidimap.NewWith(gutils.IntComparator, gutils.StringComparator),
-			NextId:  0,
-		}
-
-		for _, entry := range elements {
-			PersistedElements.Entries.Put(PersistedElements.NextId, entry)
-			PersistedElements.NextId++
-		}
-
 		data, err = os.ReadFile(item_type_path)
 		if err != nil {
 			return err
@@ -99,6 +88,16 @@ func LoadPersistedElements(persistenceDir string) error {
 		if err != nil {
 			fmt.Println(err)
 		}
+	}
+
+	PersistedElements = PersistentStringKeysMap{
+		Entries: treebidimap.NewWith(gutils.IntComparator, gutils.StringComparator),
+		NextId:  0,
+	}
+
+	for _, entry := range elements {
+		PersistedElements.Entries.Put(PersistedElements.NextId, entry)
+		PersistedElements.NextId++
 	}
 
 	PersistedTypes = PersistentStringKeysMap{

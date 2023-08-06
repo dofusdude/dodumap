@@ -232,7 +232,7 @@ func Parse(dir string, indent string, persistenceDir string, release string) {
 	wg.Wait()
 
 	if persistenceDir != "" {
-		err := PersistElements(filepath.Join(persistenceDir, "elements.json"), filepath.Join(persistenceDir, "item_types.json"))
+		err := PersistElements(filepath.Join(persistenceDir, fmt.Sprintf("elements.%s.json", release)), filepath.Join(persistenceDir, fmt.Sprintf("item_types.%s.json", release)))
 		if err != nil {
 			log.Fatal(err)
 		}

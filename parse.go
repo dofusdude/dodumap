@@ -28,14 +28,11 @@ var (
 	PersistedTypes    PersistentStringKeysMap
 )
 
-func LoadPersistedElements(persistenceDir string) error {
-	var element_path string
-	var item_type_path string
-
+func LoadPersistedElements(persistenceDir string, release string) error {
 	var elements []string
 	var types []string
 	if persistenceDir == "" {
-		elementUrl := "https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/elements.json"
+		elementUrl := fmt.Sprintf("https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/elements.%s.json", release)
 		elementResponse, err := http.Get(elementUrl)
 		if err != nil {
 			log.Fatal(err)
@@ -51,7 +48,7 @@ func LoadPersistedElements(persistenceDir string) error {
 			log.Fatal(err)
 		}
 
-		itemTypeUrl := "https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/item_types.json"
+		itemTypeUrl := fmt.Sprintf("https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/item_types.%s.json", release)
 		itemTypeResponse, err := http.Get(itemTypeUrl)
 		if err != nil {
 			log.Fatal(err)
@@ -67,10 +64,7 @@ func LoadPersistedElements(persistenceDir string) error {
 			log.Fatal(err)
 		}
 	} else {
-		element_path = filepath.Join(persistenceDir, "elements.json")
-		item_type_path = filepath.Join(persistenceDir, "item_types.json")
-
-		data, err := os.ReadFile(element_path)
+		data, err := os.ReadFile(filepath.Join(persistenceDir, fmt.Sprintf("elements.%s.json", release)))
 		if err != nil {
 			return err
 		}
@@ -80,7 +74,7 @@ func LoadPersistedElements(persistenceDir string) error {
 			fmt.Println(err)
 		}
 
-		data, err = os.ReadFile(item_type_path)
+		data, err = os.ReadFile(filepath.Join(persistenceDir, fmt.Sprintf("item_types.%s.json", release)))
 		if err != nil {
 			return err
 		}
@@ -168,14 +162,14 @@ func marshalSave(data interface{}, path string, indent string) {
 	log.Infof("%s ✅", filepath.Base(path))
 }
 
-func Parse(dir string, indent string, persistenceDir string) {
+func Parse(dir string, indent string, persistenceDir string, release string) {
 	log.Info("Parsing...")
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := LoadPersistedElements(persistenceDir)
+		err := LoadPersistedElements(persistenceDir, release)
 		if err != nil {
 			log.Fatal(err)
 		}

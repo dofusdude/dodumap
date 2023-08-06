@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -146,100 +147,102 @@ func PersistElements(elementPath string, itemTypePath string) error {
 	return nil
 }
 
+func marshalSave(data interface{}, path string, indent string) {
+	out, err := os.Create(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer out.Close()
+
+	var outBytes []byte
+	if indent != "" {
+		outBytes, err = json.MarshalIndent(data, "", indent)
+	} else {
+		outBytes, err = json.Marshal(data)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	out.Write(outBytes)
+	log.Infof("%s ✅", filepath.Base(path))
+}
+
 func Parse(dir string, indent string, persistenceDir string) {
 	log.Info("Parsing...")
 
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := LoadPersistedElements(persistenceDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	startParsing := time.Now()
-	gameData := ParseRawData(dir)
-	languageData := ParseRawLanguages(dir)
+	var gameData *JSONGameData
+	var languageData map[string]LangDict
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		gameData = ParseRawData(dir)
+	}()
+
+	go func() {
+		defer wg.Done()
+		languageData = ParseRawLanguages(dir)
+	}()
+
+	wg.Wait()
 	log.Infof("... %.2fs", time.Since(startParsing).Seconds())
 
 	startMapping := time.Now()
-	err := LoadPersistedElements(persistenceDir)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	log.Info("Mapping...")
-	mappedItems := MapItems(gameData, &languageData)
-	mappedItemPath := filepath.Join(dir, "data", "MAPPED_ITEMS.json")
-	out, err := os.Create(mappedItemPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer out.Close()
+	wg = sync.WaitGroup{}
 
-	outBytes, err := json.MarshalIndent(mappedItems, "", indent)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		mappedItems := MapItems(gameData, &languageData)
+		mappedItemPath := filepath.Join(dir, "data", "MAPPED_ITEMS.json")
+		marshalSave(mappedItems, mappedItemPath, indent)
+	}()
 
-	out.Write(outBytes)
-	log.Infof("📁 %s", mappedItemPath)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		mappedMounts := MapMounts(gameData, &languageData)
+		mappedMountsPath := filepath.Join(dir, "data", "MAPPED_MOUNTS.json")
+		marshalSave(mappedMounts, mappedMountsPath, indent)
+	}()
 
-	mappedMounts := MapMounts(gameData, &languageData)
-	mappedMountsPath := filepath.Join(dir, "data", "MAPPED_MOUNTS.json")
-	out, err = os.Create(mappedMountsPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer out.Close()
+	wg.Add(1)
+	go func() {
+		mappedSets := MapSets(gameData, &languageData)
+		mappedSetsPath := filepath.Join(dir, "data", "MAPPED_SETS.json")
+		marshalSave(mappedSets, mappedSetsPath, indent)
+	}()
 
-	outBytes, err = json.MarshalIndent(mappedMounts, "", indent)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	wg.Add(1)
+	go func() {
+		mappedRecipes := MapRecipes(gameData)
+		mappedRecipesPath := filepath.Join(dir, "data", "MAPPED_RECIPES.json")
+		marshalSave(mappedRecipes, mappedRecipesPath, indent)
+	}()
 
-	out.Write(outBytes)
-	log.Infof("📁 %s", mappedMountsPath)
-
-	mappedSets := MapSets(gameData, &languageData)
-	mappedSetsPath := filepath.Join(dir, "data", "MAPPED_SETS.json")
-	outSets, err := os.Create(mappedSetsPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer outSets.Close()
-
-	outSetsBytes, err := json.MarshalIndent(mappedSets, "", indent)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	outSets.Write(outSetsBytes)
-	log.Infof("📁 %s", mappedSetsPath)
-
-	mappedRecipes := MapRecipes(gameData)
-	var outRecipes *os.File
-	mappedRecipesPath := filepath.Join(dir, "data", "MAPPED_RECIPES.json")
-	outRecipes, err = os.Create(mappedRecipesPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer outRecipes.Close()
-
-	var outRecipeBytes []byte
-	outRecipeBytes, err = json.MarshalIndent(mappedRecipes, "", indent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	outRecipes.Write(outRecipeBytes)
-	log.Infof("📁 %s", mappedRecipesPath)
+	wg.Wait()
 
 	if persistenceDir != "" {
-		err = PersistElements(filepath.Join(persistenceDir, "elements.json"), filepath.Join(persistenceDir, "item_types.json"))
+		err := PersistElements(filepath.Join(persistenceDir, "elements.json"), filepath.Join(persistenceDir, "item_types.json"))
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	log.Infof("... %.2fs", time.Since(startMapping).Seconds())
-	mappedSets = nil
-	mappedItems = nil
 }
 
 func isActiveEffect(name map[string]string) bool {

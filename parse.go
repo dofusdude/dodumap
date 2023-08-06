@@ -221,6 +221,7 @@ func Parse(dir string, indent string, persistenceDir string) {
 
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		mappedSets := MapSets(gameData, &languageData)
 		mappedSetsPath := filepath.Join(dir, "data", "MAPPED_SETS.json")
 		marshalSave(mappedSets, mappedSetsPath, indent)
@@ -228,6 +229,7 @@ func Parse(dir string, indent string, persistenceDir string) {
 
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		mappedRecipes := MapRecipes(gameData)
 		mappedRecipesPath := filepath.Join(dir, "data", "MAPPED_RECIPES.json")
 		marshalSave(mappedRecipes, mappedRecipesPath, indent)

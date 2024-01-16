@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -182,7 +183,10 @@ func ConditionWithOperator(input string, operator string, langs *map[string]Lang
 		out.Templated[lang] = langStr
 	}
 	out.Operator = operator
-	return true
+
+	buggyConditions := []int{181}
+
+	return !slices.Contains(buggyConditions, out.ElementId)
 }
 
 // NumSpellFormatter returns info about min max with in. -1 "only_min", -2 "no_min_max"

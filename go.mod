@@ -1,6 +1,6 @@
 module github.com/dofusdude/dodumap
 
-go 1.20
+go 1.21
 
 require (
 	github.com/charmbracelet/log v0.3.1

@@ -1,9 +1,11 @@
 package dodumap
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -73,58 +75,183 @@ func TestParseSigness4(t *testing.T) {
 	}
 }
 
-func TestParseConditionSimple(t *testing.T) {
-	condition := ParseCondition("cs<25", &TestingLangs, TestingData)
+func conditionTreeDepth(conditionTree *ConditionTreeNodeMapped) int {
+	if conditionTree == nil {
+		return 0
+	}
 
-	if len(condition) != 1 {
-		t.Errorf("condition length is not 1: %d", len(condition))
+	// has many children
+	if len(conditionTree.Children) > 0 {
+		max := 0
+		for _, child := range conditionTree.Children {
+			depth := conditionTreeDepth(child)
+			if depth > max {
+				max = depth
+			}
+		}
+		return max + 1
 	}
-	if condition[0].Operator != "<" {
-		t.Errorf("operator is not <: %s", condition[0].Operator)
+
+	return 1
+}
+
+func printAtomicCondition(condition MappedMultilangCondition) string {
+	return fmt.Sprintf("%s %s %d", condition.Templated["de"], condition.Operator, condition.Value)
+}
+
+func printTreeToString(node *ConditionTreeNodeMapped, level int) string {
+	if node == nil {
+		return ""
 	}
-	if condition[0].Value != 25 {
-		t.Errorf("value is not 25: %d", condition[0].Value)
+
+	var output string
+	if !node.IsOperand {
+		output += fmt.Sprintf("%s%s\n", strings.Repeat(" ", level*2), *node.Relation)
+		for _, child := range node.Children {
+			output += printTreeToString(child, level+1)
+		}
+	} else {
+		output += fmt.Sprintf("%s%s\n", strings.Repeat(" ", level*2), printAtomicCondition(*node.Value))
+		for _, child := range node.Children {
+			output += printTreeToString(child, level+1)
+		}
 	}
-	if condition[0].Templated["de"] != "Stärke" {
-		t.Errorf("templated is not Stärke: %s", condition[0].Templated["de"])
+	return output
+}
+
+func TestParseConditionSimple(t *testing.T) {
+	oldConditions, conditionTree := ParseCondition("cs<25", &TestingLangs, TestingData)
+
+	if len(oldConditions) != 1 {
+		t.Errorf("condition length is not 1: %d", len(oldConditions))
+	}
+	if oldConditions[0].Operator != "<" {
+		t.Errorf("operator is not <: %s", oldConditions[0].Operator)
+	}
+	if oldConditions[0].Value != 25 {
+		t.Errorf("value is not 25: %d", oldConditions[0].Value)
+	}
+	if oldConditions[0].Templated["de"] != "Stärke" {
+		t.Errorf("templated is not Stärke: %s", oldConditions[0].Templated["de"])
+	}
+
+	depth := conditionTreeDepth(conditionTree)
+	if depth != 1 {
+		t.Errorf("conditionTree depth is not 1: %d\n%s", depth, printTreeToString(conditionTree, 0))
+	}
+
+	condition := conditionTree.Value
+
+	if condition.Operator != "<" {
+		t.Errorf("operator is not <: %s", condition.Operator)
+	}
+
+	if condition.Value != 25 {
+		t.Errorf("value is not 25: %d", condition.Value)
+	}
+	if condition.Templated["de"] != "Stärke" {
+		t.Errorf("templated is not Stärke: %s", condition.Templated["de"])
 	}
 }
 
 func TestParseConditionMulti(t *testing.T) {
-	condition := ParseCondition("CS>80&CV>40&CA>40", &TestingLangs, TestingData)
+	toParse := "CS>80&CV>40&CA>40"
+	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)
 
-	if len(condition) != 3 {
-		t.Errorf("condition length is not 3: %d", len(condition))
-	}
-
-	if condition[0].Operator != ">" {
-		t.Errorf("operator is not >: %s", condition[0].Operator)
-	}
-	if condition[0].Value != 80 {
-		t.Errorf("value is not 80: %d", condition[0].Value)
-	}
-	if condition[0].Templated["de"] != "Stärke" {
-		t.Errorf("templated is not Stärke: %s", condition[0].Templated["de"])
+	if len(oldConditions) != 3 {
+		t.Errorf("condition length is not 3: %d", len(oldConditions))
 	}
 
-	if condition[1].Operator != ">" {
-		t.Errorf("operator is not >: %s", condition[1].Operator)
+	if oldConditions[0].Operator != ">" {
+		t.Errorf("operator is not >: %s", oldConditions[0].Operator)
 	}
-	if condition[1].Value != 40 {
-		t.Errorf("value is not 40: %d", condition[1].Value)
+	if oldConditions[0].Value != 80 {
+		t.Errorf("value is not 80: %d", oldConditions[0].Value)
 	}
-	if condition[1].Templated["de"] != "Vitalität" {
-		t.Errorf("templated is not Vitalität: %s", condition[1].Templated["de"])
+	if oldConditions[0].Templated["de"] != "Stärke" {
+		t.Errorf("templated is not Stärke: %s", oldConditions[0].Templated["de"])
 	}
 
-	if condition[2].Operator != ">" {
-		t.Errorf("operator is not >: %s", condition[2].Operator)
+	if oldConditions[1].Operator != ">" {
+		t.Errorf("operator is not >: %s", oldConditions[1].Operator)
 	}
-	if condition[2].Value != 40 {
-		t.Errorf("value is not 40: %d", condition[2].Value)
+	if oldConditions[1].Value != 40 {
+		t.Errorf("value is not 40: %d", oldConditions[1].Value)
 	}
-	if condition[2].Templated["de"] != "Flinkheit" {
-		t.Errorf("templated is not Flinkheit: %s", condition[2].Templated["de"])
+	if oldConditions[1].Templated["de"] != "Vitalität" {
+		t.Errorf("templated is not Vitalität: %s", oldConditions[1].Templated["de"])
+	}
+
+	if oldConditions[2].Operator != ">" {
+		t.Errorf("operator is not >: %s", oldConditions[2].Operator)
+	}
+	if oldConditions[2].Value != 40 {
+		t.Errorf("value is not 40: %d", oldConditions[2].Value)
+	}
+	if oldConditions[2].Templated["de"] != "Flinkheit" {
+		t.Errorf("templated is not Flinkheit: %s", oldConditions[2].Templated["de"])
+	}
+
+	depth := conditionTreeDepth(conditionTree)
+	if depth != 3 {
+		t.Errorf("conditionTree depth is not 1: %d\n%s", depth, printTreeToString(conditionTree, 0))
+	}
+
+	if conditionTree.Value != nil {
+		t.Errorf("expr is nested, must start with operator: %s", conditionTree.Value.Element)
+	}
+
+	expected := `and
+  and
+    Stärke > 80
+    Vitalität > 40
+  Flinkheit > 40
+`
+
+	if printTreeToString(conditionTree, 0) != expected {
+		t.Errorf("conditionTree is not as expected. expression: %s, expected tree: \n%s\nbut is:\n%s", toParse, expected, printTreeToString(conditionTree, 0))
+	}
+}
+
+func TestParseOrAndConditionMulti(t *testing.T) {
+	toParse := "CS>80&(CV>40|CA>40)"
+	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)
+
+	if len(oldConditions) != 1 {
+		t.Errorf("condition length is not 1: %d", len(oldConditions))
+	}
+
+	depth := conditionTreeDepth(conditionTree)
+	if depth != 3 {
+		t.Errorf("conditionTree depth is not 1: %d\n%s", depth, printTreeToString(conditionTree, 0))
+	}
+
+	if conditionTree.Value != nil {
+		t.Errorf("expr is nested, must start with operator: %s", conditionTree.Value.Element)
+	}
+
+	expected := `and
+  Stärke > 80
+  or
+    Vitalität > 40
+    Flinkheit > 40
+`
+
+	if printTreeToString(conditionTree, 0) != expected {
+		t.Errorf("conditionTree is not as expected. expression: %s, expected tree: \n%s\nbut is:\n%s", toParse, expected, printTreeToString(conditionTree, 0))
+	}
+}
+
+func TestParseConditionEmpty(t *testing.T) {
+	toParse := "null"
+	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)
+
+	if len(oldConditions) > 0 {
+		t.Errorf("condition should be empty")
+	}
+
+	if conditionTree != nil {
+		t.Errorf("conditionTree should be empty with condition \"null\"")
 	}
 }
 
@@ -132,13 +259,6 @@ func TestDeleteNumHash(t *testing.T) {
 	effect_name := DeleteDamageFormatter("Austauschbar ab: #1")
 	if effect_name != "Austauschbar ab:" {
 		t.Errorf("output is not as expected: %s", effect_name)
-	}
-}
-
-func TestParseConditionEmpty(t *testing.T) {
-	condition := ParseCondition("null", &TestingLangs, TestingData)
-	if len(condition) > 0 {
-		t.Errorf("condition should be empty")
 	}
 }
 

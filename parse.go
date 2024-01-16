@@ -8,8 +8,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/charmbracelet/log"
 	"github.com/emirpasic/gods/maps/treebidimap"
@@ -245,53 +247,250 @@ func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect,
 	return mappedAllEffects
 }
 
-func ParseCondition(condition string, langs *map[string]LangDict, data *JSONGameData) []MappedMultilangCondition {
-	if condition == "" || (!strings.Contains(condition, "&") && !strings.Contains(condition, "<") && !strings.Contains(condition, ">")) {
-		return nil
+// NewNode creates a new Node
+func newNode(value string, nodeType NodeType) *ConditionTreeNode {
+	return &ConditionTreeNode{
+		Value:    value,
+		Type:     nodeType,
+		Children: []*ConditionTreeNode{},
 	}
+}
 
-	condition = strings.ReplaceAll(condition, "\n", "")
+// AddChild adds a child node
+func (n *ConditionTreeNode) AddChild(child *ConditionTreeNode) {
+	n.Children = append(n.Children, child)
+}
 
-	lower := strings.ToLower(condition)
+func ParseExpression(exp string) *ConditionTreeNode {
+	var stack []*ConditionTreeNode
+	var current *ConditionTreeNode
+	var operandBuilder strings.Builder
 
-	var outs []MappedMultilangCondition
+	conditionOperators := []rune{'<', '>', '=', '!'}
 
-	var parts []string
-	if strings.Contains(lower, "&") {
-		parts = strings.Split(lower, "&")
-	} else {
-		parts = []string{lower}
-	}
-
-	operators := []string{"<", ">", "=", "!"}
-
-	for _, part := range parts {
-		var out MappedMultilangCondition
-		out.Templated = make(map[string]string)
-
-		foundCond := false
-		for _, operator := range operators { // try every known operator against it
-			if strings.Contains(part, operator) {
-				var outTmp MappedMultilangCondition
-				outTmp.Templated = make(map[string]string)
-				foundConditionElement := ConditionWithOperator(part, operator, langs, &out, data)
-				if foundConditionElement {
-					foundCond = true
+	for _, char := range exp {
+		if unicode.IsLetter(char) || unicode.IsDigit(char) || slices.Contains(conditionOperators, char) {
+			operandBuilder.WriteRune(char) // continue building operand
+		} else {
+			if operandBuilder.Len() > 0 {
+				// finalize and add the operand
+				if current != nil && current.Type == Operator {
+					current.AddChild(newNode(operandBuilder.String(), Operand))
+				} else {
+					current = newNode(operandBuilder.String(), Operand)
 				}
+				operandBuilder.Reset()
+			}
+
+			switch char {
+			case '(':
+				if current != nil {
+					stack = append(stack, current)
+				}
+				current = nil
+			case ')':
+				if len(stack) > 0 {
+					parent := stack[len(stack)-1]
+					stack = stack[:len(stack)-1]
+					parent.AddChild(current)
+					current = parent
+				}
+			case '&', '|': // expression operators
+				operator := newNode(string(char), Operator)
+				if current != nil {
+					operator.AddChild(current)
+				}
+				current = operator
 			}
 		}
+	}
 
-		if foundCond {
-			outs = append(outs, out)
+	if operandBuilder.Len() > 0 {
+		if current != nil && current.Type == Operator {
+			current.AddChild(newNode(operandBuilder.String(), Operand))
+		} else {
+			current = newNode(operandBuilder.String(), Operand)
 		}
 	}
 
-	if len(outs) == 0 {
+	return current
+}
+
+func atomicCondition(expression string, langs *map[string]LangDict, data *JSONGameData) (bool, MappedMultilangCondition) {
+	operators := []string{"<", ">", "=", "!"}
+
+	var out MappedMultilangCondition
+	out.Templated = make(map[string]string)
+
+	foundCond := false
+	for _, operator := range operators { // try every known operator against it
+		if strings.Contains(expression, operator) {
+			foundConditionElement := ConditionWithOperator(expression, operator, langs, &out, data)
+			if foundConditionElement {
+				foundCond = true
+				break
+			}
+		}
+	}
+
+	return foundCond, out
+}
+
+func removeUnsupportedExpressions(node *ConditionTreeNode, langs *map[string]LangDict, data *JSONGameData) *ConditionTreeNode {
+	if node == nil {
 		return nil
 	}
 
-	return outs
+	// If the node is an operand and not supported, return nil
+	validCond, _ := atomicCondition(node.Value, langs, data)
+	if node.Type == Operand && !validCond {
+		return nil
+	}
+
+	// Process children
+	var validChildren []*ConditionTreeNode
+	for _, child := range node.Children {
+		processedChild := removeUnsupportedExpressions(child, langs, data)
+		if processedChild != nil {
+			validChildren = append(validChildren, processedChild)
+		}
+	}
+	node.Children = validChildren
+
+	return node
 }
+
+func simplifyTree(node *ConditionTreeNode) *ConditionTreeNode {
+	if node == nil {
+		return nil
+	}
+
+	// Process children
+	var validChildren []*ConditionTreeNode
+	for _, child := range node.Children {
+		processedChild := simplifyTree(child)
+		if processedChild != nil {
+			validChildren = append(validChildren, processedChild)
+		}
+	}
+	node.Children = validChildren
+
+	// If an operator node has only one child, replace it with its child
+	if node.Type == Operator && len(node.Children) == 1 {
+		return node.Children[0]
+	}
+
+	return node
+}
+
+func buildMappedConditionTree(out **ConditionTreeNodeMapped, root *ConditionTreeNode, langs *map[string]LangDict, data *JSONGameData) {
+	if root == nil {
+		return
+	}
+
+	if root.Type == Operand {
+		foundCond, mappedCond := atomicCondition(root.Value, langs, data)
+		if !foundCond {
+			log.Fatal("condition not found, should be handled before")
+		}
+
+		if *out == nil {
+			*out = new(ConditionTreeNodeMapped)
+		}
+
+		(*out).Value = &mappedCond
+		(*out).IsOperand = true
+		return
+	} else if root.Type == Operator {
+		if *out == nil {
+			*out = new(ConditionTreeNodeMapped)
+		}
+		(*out).IsOperand = false
+		if root.Value == "&" {
+			(*out).Relation = new(string)
+			*(*out).Relation = "and"
+		} else if root.Value == "|" {
+			(*out).Relation = new(string)
+			*(*out).Relation = "or"
+		} else {
+			log.Fatal("unknown operator")
+		}
+		(*out).Children = make([]*ConditionTreeNodeMapped, len(root.Children))
+		for i, child := range root.Children {
+			childOut := new(*ConditionTreeNodeMapped)
+			buildMappedConditionTree(childOut, child, langs, data)
+			(*out).Children[i] = *childOut
+		}
+		return
+	} else {
+		log.Fatal("unknown node type")
+	}
+}
+
+func PrintTree(node *ConditionTreeNode, level int) {
+	if node == nil {
+		return
+	}
+
+	fmt.Printf("%s%s\n", strings.Repeat(" ", level*2), node.Value)
+	for _, child := range node.Children {
+		PrintTree(child, level+1)
+	}
+}
+
+func buildHistoricAndConnectionArray(mappedTree *ConditionTreeNodeMapped, out *[]MappedMultilangCondition) {
+	if mappedTree == nil {
+		return
+	}
+
+	if mappedTree.IsOperand {
+		*out = append(*out, *mappedTree.Value)
+		return
+	}
+
+	if *mappedTree.Relation == "and" {
+		for _, child := range mappedTree.Children {
+			buildHistoricAndConnectionArray(child, out)
+		}
+	}
+}
+
+func ParseCondition(condition string, langs *map[string]LangDict, data *JSONGameData) ([]MappedMultilangCondition, *ConditionTreeNodeMapped) {
+	if condition == "" || (!strings.Contains(condition, "&") && !strings.Contains(condition, "|") && !strings.Contains(condition, "<") && !strings.Contains(condition, ">")) {
+		return nil, nil
+	}
+
+	// parse into ast
+	tree := ParseExpression(condition)
+
+	// strip tree to only known conditions
+	tree = removeUnsupportedExpressions(tree, langs, data)
+	tree = simplifyTree(tree)
+
+	if tree == nil {
+		return nil, nil
+	}
+
+	// convert to mapped tree
+	mappedTree := new(*ConditionTreeNodeMapped)
+	buildMappedConditionTree(mappedTree, tree, langs, data)
+
+	if *mappedTree == nil {
+		log.Fatal("mapped tree is nil")
+	}
+
+	// for historical reasons, still return the old format but only for &-connected conditions
+	// check the tree and combine all children that are connected with & to a single array
+	var mappedConditions []MappedMultilangCondition
+	buildHistoricAndConnectionArray(*mappedTree, &mappedConditions)
+	if len(mappedConditions) == 0 {
+		mappedConditions = nil
+	}
+
+	return mappedConditions, *mappedTree
+}
+
+// TODO: previous "conditions" convert to only be with simple & operator
 
 type HasId interface {
 	GetID() int

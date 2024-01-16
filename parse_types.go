@@ -8,6 +8,27 @@ type MappedMultilangCondition struct {
 	Templated map[string]string `json:"templated"`
 }
 
+// NodeType defines the type of a node - either an operator or an operand
+type NodeType int
+
+const (
+	Operand  NodeType = iota // like "a" in "a & b"
+	Operator                 // like "&" in "a & b"
+)
+
+type ConditionTreeNode struct {
+	Value    string
+	Type     NodeType
+	Children []*ConditionTreeNode
+}
+
+type ConditionTreeNodeMapped struct {
+	Value     *MappedMultilangCondition  `json:"value"`
+	IsOperand bool                       `json:"is_operand"`
+	Relation  *string                    `json:"relation"` // "and" or "or"
+	Children  []*ConditionTreeNodeMapped `json:"children"`
+}
+
 type MappedMultilangRecipe struct {
 	ResultId int                          `json:"result_id"`
 	Entries  []MappedMultilangRecipeEntry `json:"entries"`
@@ -71,6 +92,7 @@ type MappedMultilangItem struct {
 	Name                   map[string]string               `json:"name"`
 	Image                  string                          `json:"image"`
 	Conditions             []MappedMultilangCondition      `json:"conditions"`
+	ConditionTree          *ConditionTreeNodeMapped        `json:"condition_tree"`
 	Level                  int                             `json:"level"`
 	UsedInRecipes          []int                           `json:"used_in_recipes"`
 	Characteristics        []MappedMultilangCharacteristic `json:"characteristics"`

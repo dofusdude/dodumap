@@ -162,7 +162,7 @@ func MapItems(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangI
 		}
 
 		if len(item.Criteria) != 0 && mappedItems[idx].Type.Name["de"] != "Verwendbarer Temporis-Gegenstand" { // TODO Temporis got some weird conditions, need to play to see the items, not in normal game
-			mappedItems[idx].Conditions = ParseCondition(item.Criteria, langs, data)
+			mappedItems[idx].Conditions, mappedItems[idx].ConditionTree = ParseCondition(item.Criteria, langs, data)
 		}
 	}
 

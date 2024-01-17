@@ -325,6 +325,18 @@ func (i JSONGameNPC) GetID() int {
 	return i.Id
 }
 
+type JSONGameTitle struct {
+	Id           int  `json:"id"`
+	NameMaleId   int  `json:"nameMaleId"`
+	NameFemaleId int  `json:"nameFemaleId"`
+	Visible      bool `json:"visible"`
+	CategoryId   int  `json:"categoryId"`
+}
+
+func (i JSONGameTitle) GetID() int {
+	return i.Id
+}
+
 type JSONGameData struct {
 	Items        map[int]JSONGameItem
 	Sets         map[int]JSONGameSet
@@ -339,4 +351,5 @@ type JSONGameData struct {
 	classes      map[int]JSONGameBreed
 	MountFamilys map[int]JSONGameMountFamily
 	npcs         map[int]JSONGameNPC
+	titles       map[int]JSONGameTitle
 }

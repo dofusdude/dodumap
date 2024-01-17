@@ -154,6 +154,11 @@ func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect,
 				numIsSpell = true
 			}
 
+			isTitle := false
+			if strings.Contains((*langs)["en"].Texts[currentEffect.DescriptionId], "Title:") {
+				isTitle = true
+			}
+
 			mappedEffect.Type = make(map[string]string)
 			mappedEffect.Templated = make(map[string]string)
 			var minMaxRemove int
@@ -188,14 +193,25 @@ func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect,
 					}
 					templatedName = SingularPluralFormatter(templatedName, effect.MinimumValue, lang)
 
+					if isTitle { // titles are Title: 0 after formatting; TODO move this into the NumSpellFormatter
+						templatedName = strings.ReplaceAll(templatedName, "0", (*langs)[lang].Texts[data.titles[diceNum].NameMaleId]) // TODO male default, idk how to make it neutral yet
+					}
+
 					effectName = DeleteDamageFormatter(effectName)
 					effectName = SingularPluralFormatter(effectName, effect.MinimumValue, lang)
 
-					mappedEffect.Min = diceNum
+					if isTitle {
+						mappedEffect.Min = 0
+						mappedEffect.Max = 0
+						mappedEffect.IsMeta = true
+					} else {
+						mappedEffect.Min = diceNum
+						mappedEffect.Max = diceSide
+						mappedEffect.IsMeta = false
+					}
 					mappedEffect.Max = diceSide
 					mappedEffect.Type[lang] = effectName
 					mappedEffect.Templated[lang] = templatedName
-					mappedEffect.IsMeta = false
 				}
 
 				if lang == "en" && mappedEffect.Type[lang] == "" {
@@ -529,6 +545,7 @@ func ParseRawData(dir string) *JSONGameData {
 	breedsChan := make(chan map[int]JSONGameBreed)
 	mountFamilyChan := make(chan map[int]JSONGameMountFamily)
 	npcsChan := make(chan map[int]JSONGameNPC)
+	titlesChan := make(chan map[int]JSONGameTitle)
 
 	go func() {
 		ParseRawDataPart("npcs.json", npcsChan, dir)
@@ -569,6 +586,9 @@ func ParseRawData(dir string) *JSONGameData {
 	go func() {
 		ParseRawDataPart("effects.json", itemEffectsChan, dir)
 	}()
+	go func() {
+		ParseRawDataPart("titles.json", titlesChan, dir)
+	}()
 
 	data.Items = <-itemChan
 	close(itemChan)
@@ -608,6 +628,9 @@ func ParseRawData(dir string) *JSONGameData {
 
 	data.npcs = <-npcsChan
 	close(npcsChan)
+
+	data.titles = <-titlesChan
+	close(titlesChan)
 
 	return &data
 }

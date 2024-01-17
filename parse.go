@@ -223,7 +223,7 @@ func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect,
 				continue
 			}
 
-			mappedEffect.Active = currentEffect.BonusType == 0
+			mappedEffect.Active = currentEffect.UseInFight
 			searchTypeEn := mappedEffect.Type["en"]
 			if mappedEffect.Active {
 				searchTypeEn += " (Active)"

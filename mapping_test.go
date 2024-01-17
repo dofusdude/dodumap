@@ -242,6 +242,19 @@ func TestParseOrAndConditionMulti(t *testing.T) {
 	}
 }
 
+func TestParseAndConditionUnknowns(t *testing.T) {
+	toParse := "KEINE>80&JAU>40"
+	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)
+
+	if len(oldConditions) != 0 {
+		t.Errorf("condition length is not 0: %d", len(oldConditions))
+	}
+
+	if conditionTree != nil {
+		t.Errorf("conditionTree is not nil: %s", printTreeToString(conditionTree, 0))
+	}
+}
+
 func TestParseConditionEmpty(t *testing.T) {
 	toParse := "null"
 	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)

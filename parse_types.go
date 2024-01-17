@@ -245,6 +245,7 @@ type JSONGameEffect struct {
 	TheoreticalDescriptionId int  `json:"theoreticalDescriptionId"`
 	BonusType                int  `json:"bonusType"` // -1,0,+1
 	ElementId                int  `json:"elementId"`
+	UseInFight               bool `json:"useInFight"`
 }
 
 func (i JSONGameEffect) GetID() int {

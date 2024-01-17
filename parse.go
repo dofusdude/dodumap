@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -141,17 +140,6 @@ func PersistElements(elementPath string, itemTypePath string) error {
 	return nil
 }
 
-func isActiveEffect(name map[string]string) bool {
-	regex := regexp.MustCompile(`^\(.*\)$`)
-	if regex.Match([]byte(name["en"])) {
-		return true
-	}
-	if strings.Contains(name["de"], "(Ziel)") {
-		return true
-	}
-	return false
-}
-
 func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect, langs *map[string]LangDict) [][]MappedMultilangEffect {
 	var mappedAllEffects [][]MappedMultilangEffect
 	for _, effects := range allEffects {
@@ -219,7 +207,7 @@ func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect,
 				continue
 			}
 
-			mappedEffect.Active = isActiveEffect(mappedEffect.Type)
+			mappedEffect.Active = currentEffect.BonusType == 0
 			searchTypeEn := mappedEffect.Type["en"]
 			if mappedEffect.Active {
 				searchTypeEn += " (Active)"
@@ -378,6 +366,11 @@ func simplifyTree(node *ConditionTreeNode) *ConditionTreeNode {
 	// If an operator node has only one child, replace it with its child
 	if node.Type == Operator && len(node.Children) == 1 {
 		return node.Children[0]
+	}
+
+	// when no children in operator, return nil
+	if node.Type == Operator && len(node.Children) == 0 {
+		return nil
 	}
 
 	return node

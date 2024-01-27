@@ -546,6 +546,12 @@ func ParseRawData(dir string) *JSONGameData {
 	mountFamilyChan := make(chan map[int]JSONGameMountFamily)
 	npcsChan := make(chan map[int]JSONGameNPC)
 	titlesChan := make(chan map[int]JSONGameTitle)
+	questsChan := make(chan map[int]JSONGameQuest)
+	questObjectivesChan := make(chan map[int]JSONGameQuestObjective)
+	questStepRewardsChan := make(chan map[int]JSONGameQuestStepRewards)
+	questCategoriesChan := make(chan map[int]JSONGameQuestCategory)
+	questStepsChan := make(chan map[int]JSONGameQuestStep)
+	almanaxCalendarsChan := make(chan map[int]JSONGameAlamanaxCalendar)
 
 	go func() {
 		ParseRawDataPart("npcs.json", npcsChan, dir)
@@ -589,6 +595,24 @@ func ParseRawData(dir string) *JSONGameData {
 	go func() {
 		ParseRawDataPart("titles.json", titlesChan, dir)
 	}()
+	go func() {
+		ParseRawDataPart("quests.json", questsChan, dir)
+	}()
+	go func() {
+		ParseRawDataPart("quest_objectives.json", questObjectivesChan, dir)
+	}()
+	go func() {
+		ParseRawDataPart("quest_step_rewards.json", questStepRewardsChan, dir)
+	}()
+	go func() {
+		ParseRawDataPart("quest_categories.json", questCategoriesChan, dir)
+	}()
+	go func() {
+		ParseRawDataPart("almanax.json", almanaxCalendarsChan, dir)
+	}()
+	go func() {
+		ParseRawDataPart("quest_steps.json", questStepsChan, dir)
+	}()
 
 	data.Items = <-itemChan
 	close(itemChan)
@@ -631,6 +655,24 @@ func ParseRawData(dir string) *JSONGameData {
 
 	data.titles = <-titlesChan
 	close(titlesChan)
+
+	data.quests = <-questsChan
+	close(questsChan)
+
+	data.questObjectives = <-questObjectivesChan
+	close(questObjectivesChan)
+
+	data.questStepRewards = <-questStepRewardsChan
+	close(questStepRewardsChan)
+
+	data.questCategories = <-questCategoriesChan
+	close(questCategoriesChan)
+
+	data.almanaxCalendars = <-almanaxCalendarsChan
+	close(almanaxCalendarsChan)
+
+	data.questSteps = <-questStepsChan
+	close(questStepsChan)
 
 	return &data
 }

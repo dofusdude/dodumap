@@ -3,6 +3,8 @@ package dodumap
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 )
 
 var Languages = []string{"de", "en", "es", "fr", "it", "pt"}
@@ -89,6 +91,70 @@ func MapMounts(data *JSONGameData, langs *map[string]LangDict) []MappedMultilang
 	}
 
 	return mappedMounts
+}
+
+func MapAlmanax(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangNPCAlmanax {
+	var mappedAlmanax []MappedMultilangNPCAlmanax
+
+	for _, almCat := range data.questCategories[31].QuestIds {
+		quest := data.quests[almCat]
+		if (*langs)["en"].Texts[quest.NameId][:8] != "Offering" {
+			continue
+		}
+
+		step := data.questSteps[quest.StepIds[0]]
+		objective := data.questObjectives[step.ObjectiveIds[0]].Parameters
+		item := data.Items[objective.Parameter1]
+		itemQuantity := objective.Parameter2
+
+		rewardKamas := int(data.questStepRewards[step.RewardsIds[0]].KamasRatio * 43980.0)
+		questObjectiveNpc := data.questObjectives[step.ObjectiveIds[2]].Parameters.Parameter0
+
+		var currAlm JSONGameAlamanaxCalendar
+		found := false
+		for _, almCal := range data.almanaxCalendars {
+			if almCal.NpcId == questObjectiveNpc {
+				currAlm = almCal
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Fatal(fmt.Sprintf("Could not find almanax calendar for NPC %d", questObjectiveNpc))
+		}
+
+		var mappedNPCAlmanax MappedMultilangNPCAlmanax
+		mappedNPCAlmanax.OfferingReceiver = (*langs)["en"].Texts[quest.NameId][13:] // remove "Offering to ". The name is the same in all languages.
+		itemNames := make(map[string]string)
+		mappedNPCAlmanax.Bonus = make(map[string]string)
+		mappedNPCAlmanax.BonusType = make(map[string]string)
+		for _, lang := range Languages {
+			itemNames[lang] = (*langs)[lang].Texts[item.NameId]
+			mappedNPCAlmanax.Bonus[lang] = (*langs)[lang].Texts[currAlm.DescId]
+			mappedNPCAlmanax.BonusType[lang] = (*langs)[lang].Texts[currAlm.NameId]
+
+			mappedNPCAlmanax.Bonus[lang] = strings.ReplaceAll(mappedNPCAlmanax.Bonus[lang], "<b>", "")
+			mappedNPCAlmanax.Bonus[lang] = strings.ReplaceAll(mappedNPCAlmanax.Bonus[lang], "</b>", "")
+		}
+		mappedNPCAlmanax.Offering.ItemId = item.Id
+		mappedNPCAlmanax.Offering.ItemName = itemNames
+		mappedNPCAlmanax.Offering.Quantity = itemQuantity
+		mappedNPCAlmanax.RewardKamas = rewardKamas
+
+		ImgBaseUrl := "https://api.dofusdu.de/dofus2/img/item/" + strconv.Itoa(item.IconId)
+		mappedNPCAlmanax.Offering.ImageUrls.HD = ImgBaseUrl + "-800.png"
+		mappedNPCAlmanax.Offering.ImageUrls.HQ = ImgBaseUrl + "-400.png"
+		mappedNPCAlmanax.Offering.ImageUrls.SD = ImgBaseUrl + "-200.png"
+		mappedNPCAlmanax.Offering.ImageUrls.Icon = ImgBaseUrl + ".png"
+
+		mappedAlmanax = append(mappedAlmanax, mappedNPCAlmanax)
+	}
+
+	if len(mappedAlmanax) == 0 {
+		return nil
+	}
+
+	return mappedAlmanax
 }
 
 func MapItems(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangItem {

@@ -91,6 +91,50 @@ func MapMounts(data *JSONGameData, langs *map[string]LangDict) []MappedMultilang
 	return mappedMounts
 }
 
+func MapAlmanax(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangNPCAlmanax {
+	var mappedAlmanax []MappedMultilangNPCAlmanax
+
+	for _, almCat := range data.questCategories[31].QuestIds {
+		quest := data.quests[almCat]
+		if (*langs)["en"].Texts[quest.NameId][:8] != "Offering" {
+			continue
+		}
+
+		step := data.questSteps[quest.StepIds[0]]
+		objective := data.questObjectives[step.ObjectiveIds[0]].Parameters
+		item := data.Items[objective.Parameter1]
+		itemQuantity := objective.Parameter2
+
+		rewardKamas := int(data.questStepRewards[step.RewardsIds[0]].KamasRatio * 43980.0)
+		questObjectiveNpc := data.questObjectives[step.ObjectiveIds[2]].Parameters
+		bonus := data.almanaxCalendars[questObjectiveNpc.Parameter0]
+
+		var mappedNPCAlmanax MappedMultilangNPCAlmanax
+		mappedNPCAlmanax.OfferingReceiver = make(map[string]string)
+		itemNames := make(map[string]string)
+		mappedNPCAlmanax.Bonus = make(map[string]string)
+		mappedNPCAlmanax.BonusType = make(map[string]string)
+		for _, lang := range Languages {
+			mappedNPCAlmanax.OfferingReceiver[lang] = (*langs)[lang].Texts[quest.NameId]
+			itemNames[lang] = (*langs)[lang].Texts[item.NameId]
+			mappedNPCAlmanax.Bonus[lang] = (*langs)[lang].Texts[bonus.NameId]
+			mappedNPCAlmanax.BonusType[lang] = (*langs)[lang].Texts[bonus.DescId]
+		}
+		mappedNPCAlmanax.Offering.ItemId = item.Id
+		mappedNPCAlmanax.Offering.ItemName = itemNames
+		mappedNPCAlmanax.Offering.Quantity = itemQuantity
+		mappedNPCAlmanax.RewardKamas = rewardKamas
+
+		mappedAlmanax = append(mappedAlmanax, mappedNPCAlmanax)
+	}
+
+	if len(mappedAlmanax) == 0 {
+		return nil
+	}
+
+	return mappedAlmanax
+}
+
 func MapItems(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangItem {
 	var filteredItems []JSONGameItem
 

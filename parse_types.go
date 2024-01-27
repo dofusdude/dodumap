@@ -111,6 +111,20 @@ type MappedMultilangItem struct {
 	HasParentSet           bool                            `json:"hasParentSet"`
 }
 
+type MappedMultilangNPCAlmanax struct {
+	OfferingReceiver map[string]string `json:"offeringReceiver"`
+	Days             []string          `json:"days"`
+	Reward           int               `json:"reward"` // quest reward in kamas
+	Offering         struct {
+		ItemId   int               `json:"itemId"`
+		ItemName map[string]string `json:"itemName"`
+		Quantity int               `json:"quantity"`
+	}
+	Bonus       map[string]string `json:"bonus"`
+	BonusType   map[string]string `json:"bonusType"`
+	RewardKamas int               `json:"rewardKamas"`
+}
+
 type JSONGameSpellType struct {
 	Id          int `json:"id"`
 	LongNameId  int `json:"longNameId"`
@@ -337,19 +351,129 @@ func (i JSONGameTitle) GetID() int {
 	return i.Id
 }
 
+type JSONGameCoordinate struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
+type JSONGameQuestParameter struct {
+	DungeonOnly bool `json:"dungeonOnly"`
+	NumParams   int  `json:"numParams"`
+	Parameter0  int  `json:"parameter0"`
+	Parameter1  int  `json:"parameter1"`
+	Parameter2  int  `json:"parameter2"`
+	Parameter3  int  `json:"parameter3"`
+	Parameter4  int  `json:"parameter4"`
+}
+
+type JSONGameQuestObjective struct {
+	Id         int                    `json:"id"`
+	Coords     JSONGameCoordinate     `json:"coords"`
+	MapId      int                    `json:"mapId"`
+	Parameters JSONGameQuestParameter `json:"parameters"`
+	StepId     int                    `json:"stepId"`
+	TypeId     int                    `json:"typeId"`
+}
+
+func (i JSONGameQuestObjective) GetID() int {
+	return i.Id
+}
+
+type JSONGameQuestCategory struct {
+	Id       int   `json:"id"`
+	NameId   int   `json:"nameId"`
+	Order    int   `json:"order"`
+	QuestIds []int `json:"questIds"`
+}
+
+func (i JSONGameQuestCategory) GetID() int {
+	return i.Id
+}
+
+type JSONGameQuest struct {
+	Id             int    `json:"id"`
+	NameId         int    `json:"nameId"`
+	StepIds        []int  `json:"stepIds"`
+	CategoryId     int    `json:"categoryId"`
+	RepeatType     int    `json:"repeatType"`
+	RepeatLimit    int    `json:"repeatLimit"`
+	IsDungeonQuest bool   `json:"isDungeonQuest"`
+	LevelMin       int    `json:"levelMin"`
+	LevelMax       int    `json:"levelMax"`
+	Followable     bool   `json:"followable"`
+	IsPartyQuest   bool   `json:"isPartyQuest"`
+	StartCriterion string `json:"startCriterion"`
+}
+
+func (i JSONGameQuest) GetID() int {
+	return i.Id
+}
+
+type JSONGameQuestStepRewards struct {
+	Id                        int     `json:"id"`
+	ExperienceRatio           float64 `json:"experienceRatio"`
+	KamasRatio                float64 `json:"kamasRatio"`
+	ItemsReward               [][]int `json:"itemsReward"`
+	KamasScaleWithPlayerLevel bool    `json:"kamasScaleWithPlayerLevel"`
+	LevelMax                  int     `json:"levelMax"`
+	LevelMin                  int     `json:"levelMin"`
+	//SpellsReward []int `json:"spellsReward"`
+	//EmotesReward []int `json:"emotesReward"`
+	//TitlesReward []int `json:"titlesReward"`
+	StepId int `json:"stepId"`
+}
+
+func (i JSONGameQuestStepRewards) GetID() int {
+	return i.Id
+}
+
+type JSONGameAlamanaxCalendar struct {
+	Id         int   `json:"id"`
+	DescId     int   `json:"descId"`
+	NameId     int   `json:"nameId"`
+	NpcId      int   `json:"npcId"`
+	BonusesIds []int `json:"bonusesIds"`
+}
+
+func (i JSONGameAlamanaxCalendar) GetID() int {
+	return i.Id
+}
+
+type JSONGameQuestStep struct {
+	Id            int   `json:"id"`
+	DescriptionId int   `json:"descriptionId"`
+	DialogId      int   `json:"dialogId"`
+	NameId        int   `json:"nameId"`
+	OptimalLevel  int   `json:"optimalLevel"`
+	Duration      int   `json:"duration"`
+	ObjectiveIds  []int `json:"objectiveIds"`
+	RewardsIds    []int `json:"rewardsIds"`
+	QuestId       int   `json:"questId"`
+}
+
+func (i JSONGameQuestStep) GetID() int {
+	return i.Id
+}
+
 type JSONGameData struct {
-	Items        map[int]JSONGameItem
-	Sets         map[int]JSONGameSet
-	ItemTypes    map[int]JSONGameItemType
-	effects      map[int]JSONGameEffect
-	bonuses      map[int]JSONGameBonus
-	Recipes      map[int]JSONGameRecipe
-	spells       map[int]JSONGameSpell
-	spellTypes   map[int]JSONGameSpellType
-	areas        map[int]JSONGameArea
-	Mounts       map[int]JSONGameMount
-	classes      map[int]JSONGameBreed
-	MountFamilys map[int]JSONGameMountFamily
-	npcs         map[int]JSONGameNPC
-	titles       map[int]JSONGameTitle
+	Items            map[int]JSONGameItem
+	Sets             map[int]JSONGameSet
+	ItemTypes        map[int]JSONGameItemType
+	effects          map[int]JSONGameEffect
+	bonuses          map[int]JSONGameBonus
+	Recipes          map[int]JSONGameRecipe
+	spells           map[int]JSONGameSpell
+	spellTypes       map[int]JSONGameSpellType
+	areas            map[int]JSONGameArea
+	Mounts           map[int]JSONGameMount
+	classes          map[int]JSONGameBreed
+	MountFamilys     map[int]JSONGameMountFamily
+	npcs             map[int]JSONGameNPC
+	titles           map[int]JSONGameTitle
+	questSteps       map[int]JSONGameQuestStep
+	questObjectives  map[int]JSONGameQuestObjective
+	questCategories  map[int]JSONGameQuestCategory
+	quests           map[int]JSONGameQuest
+	questStepRewards map[int]JSONGameQuestStepRewards
+	almanaxCalendars map[int]JSONGameAlamanaxCalendar
 }

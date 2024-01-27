@@ -599,19 +599,19 @@ func ParseRawData(dir string) *JSONGameData {
 		ParseRawDataPart("quests.json", questsChan, dir)
 	}()
 	go func() {
-		ParseRawDataPart("questobjectives.json", questObjectivesChan, dir)
+		ParseRawDataPart("quest_objectives.json", questObjectivesChan, dir)
 	}()
 	go func() {
-		ParseRawDataPart("queststeprewards.json", questStepRewardsChan, dir)
+		ParseRawDataPart("quest_step_rewards.json", questStepRewardsChan, dir)
 	}()
 	go func() {
-		ParseRawDataPart("questcategories.json", questCategoriesChan, dir)
+		ParseRawDataPart("quest_categories.json", questCategoriesChan, dir)
 	}()
 	go func() {
 		ParseRawDataPart("almanax.json", almanaxCalendarsChan, dir)
 	}()
 	go func() {
-		ParseRawDataPart("queststeps.json", questStepsChan, dir)
+		ParseRawDataPart("quest_steps.json", questStepsChan, dir)
 	}()
 
 	data.Items = <-itemChan

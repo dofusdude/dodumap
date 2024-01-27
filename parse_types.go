@@ -112,13 +112,18 @@ type MappedMultilangItem struct {
 }
 
 type MappedMultilangNPCAlmanax struct {
-	OfferingReceiver map[string]string `json:"offeringReceiver"`
-	Days             []string          `json:"days"`
-	Reward           int               `json:"reward"` // quest reward in kamas
+	OfferingReceiver string   `json:"offeringReceiver"`
+	Days             []string `json:"days"`
 	Offering         struct {
-		ItemId   int               `json:"itemId"`
-		ItemName map[string]string `json:"itemName"`
-		Quantity int               `json:"quantity"`
+		ItemId    int               `json:"itemId"`
+		ItemName  map[string]string `json:"itemName"`
+		Quantity  int               `json:"quantity"`
+		ImageUrls struct {
+			HD   string `json:"hd"`
+			HQ   string `json:"hq"`
+			SD   string `json:"sd"`
+			Icon string `json:"icon"`
+		}
 	}
 	Bonus       map[string]string `json:"bonus"`
 	BonusType   map[string]string `json:"bonusType"`
@@ -440,15 +445,15 @@ func (i JSONGameAlamanaxCalendar) GetID() int {
 }
 
 type JSONGameQuestStep struct {
-	Id            int   `json:"id"`
-	DescriptionId int   `json:"descriptionId"`
-	DialogId      int   `json:"dialogId"`
-	NameId        int   `json:"nameId"`
-	OptimalLevel  int   `json:"optimalLevel"`
-	Duration      int   `json:"duration"`
-	ObjectiveIds  []int `json:"objectiveIds"`
-	RewardsIds    []int `json:"rewardsIds"`
-	QuestId       int   `json:"questId"`
+	Id            int     `json:"id"`
+	DescriptionId int     `json:"descriptionId"`
+	DialogId      int     `json:"dialogId"`
+	NameId        int     `json:"nameId"`
+	OptimalLevel  int     `json:"optimalLevel"`
+	Duration      float64 `json:"duration"`
+	ObjectiveIds  []int   `json:"objectiveIds"`
+	RewardsIds    []int   `json:"rewardsIds"`
+	QuestId       int     `json:"questId"`
 }
 
 func (i JSONGameQuestStep) GetID() int {

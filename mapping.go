@@ -3,6 +3,8 @@ package dodumap
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 )
 
 var Languages = []string{"de", "en", "es", "fr", "it", "pt"}
@@ -106,24 +108,44 @@ func MapAlmanax(data *JSONGameData, langs *map[string]LangDict) []MappedMultilan
 		itemQuantity := objective.Parameter2
 
 		rewardKamas := int(data.questStepRewards[step.RewardsIds[0]].KamasRatio * 43980.0)
-		questObjectiveNpc := data.questObjectives[step.ObjectiveIds[2]].Parameters
-		bonus := data.almanaxCalendars[questObjectiveNpc.Parameter0]
+		questObjectiveNpc := data.questObjectives[step.ObjectiveIds[2]].Parameters.Parameter0
+
+		var currAlm JSONGameAlamanaxCalendar
+		found := false
+		for _, almCal := range data.almanaxCalendars {
+			if almCal.NpcId == questObjectiveNpc {
+				currAlm = almCal
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Fatal(fmt.Sprintf("Could not find almanax calendar for NPC %d", questObjectiveNpc))
+		}
 
 		var mappedNPCAlmanax MappedMultilangNPCAlmanax
-		mappedNPCAlmanax.OfferingReceiver = make(map[string]string)
+		mappedNPCAlmanax.OfferingReceiver = (*langs)["en"].Texts[quest.NameId][13:] // remove "Offering to ". The name is the same in all languages.
 		itemNames := make(map[string]string)
 		mappedNPCAlmanax.Bonus = make(map[string]string)
 		mappedNPCAlmanax.BonusType = make(map[string]string)
 		for _, lang := range Languages {
-			mappedNPCAlmanax.OfferingReceiver[lang] = (*langs)[lang].Texts[quest.NameId]
 			itemNames[lang] = (*langs)[lang].Texts[item.NameId]
-			mappedNPCAlmanax.Bonus[lang] = (*langs)[lang].Texts[bonus.NameId]
-			mappedNPCAlmanax.BonusType[lang] = (*langs)[lang].Texts[bonus.DescId]
+			mappedNPCAlmanax.Bonus[lang] = (*langs)[lang].Texts[currAlm.DescId]
+			mappedNPCAlmanax.BonusType[lang] = (*langs)[lang].Texts[currAlm.NameId]
+
+			mappedNPCAlmanax.Bonus[lang] = strings.ReplaceAll(mappedNPCAlmanax.Bonus[lang], "<b>", "")
+			mappedNPCAlmanax.Bonus[lang] = strings.ReplaceAll(mappedNPCAlmanax.Bonus[lang], "</b>", "")
 		}
 		mappedNPCAlmanax.Offering.ItemId = item.Id
 		mappedNPCAlmanax.Offering.ItemName = itemNames
 		mappedNPCAlmanax.Offering.Quantity = itemQuantity
 		mappedNPCAlmanax.RewardKamas = rewardKamas
+
+		ImgBaseUrl := "https://api.dofusdu.de/dofus2/img/item/" + strconv.Itoa(item.IconId)
+		mappedNPCAlmanax.Offering.ImageUrls.HD = ImgBaseUrl + "-800.png"
+		mappedNPCAlmanax.Offering.ImageUrls.HQ = ImgBaseUrl + "-400.png"
+		mappedNPCAlmanax.Offering.ImageUrls.SD = ImgBaseUrl + "-200.png"
+		mappedNPCAlmanax.Offering.ImageUrls.Icon = ImgBaseUrl + ".png"
 
 		mappedAlmanax = append(mappedAlmanax, mappedNPCAlmanax)
 	}

@@ -341,7 +341,7 @@ func TestParseNumSpellNameFormatterItSpecial(t *testing.T) {
 	diceNum := 100
 	diceSide := 233
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0 // unsigned
 	output, _ := NumSpellFormatter(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Ottieni: 100 - 233 kama" {

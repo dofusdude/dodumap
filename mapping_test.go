@@ -362,7 +362,7 @@ func TestParseNumSpellNameFormatterItSpecialSwitch(t *testing.T) {
 	diceNum := 100
 	diceSide := 36
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "36: +100 EP" {
@@ -383,7 +383,7 @@ func TestParseNumSpellNameFormatterLearnSpellLevel(t *testing.T) {
 	diceNum := 0
 	diceSide := 0
 	value := 1746
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Stufe 1746 des Zauberspruchs erlernen" {
@@ -396,7 +396,7 @@ func TestParseNumSpellNameFormatterLearnSpellLevel1(t *testing.T) {
 	diceNum := 0
 	diceSide := 1
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Stufe 1 des Zauberspruchs erlernen" {
@@ -409,7 +409,7 @@ func TestParseNumSpellNameFormatterDeNormal(t *testing.T) {
 	diceNum := 100
 	diceSide := 233
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "100 bis 233 Kamagewinn" {
@@ -422,7 +422,7 @@ func TestParseNumSpellNameFormatterMultiValues(t *testing.T) {
 	diceNum := 1
 	diceSide := 2
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Erfolgschance zwischen 1 und 2%" {
@@ -433,7 +433,7 @@ func TestParseNumSpellNameFormatterMultiValues(t *testing.T) {
 	diceNum = 1
 	diceSide = 2
 	value = 0
-	frNumSigned = 2
+	frNumSigned = 0
 	output, _ = NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Erfolgschance zwischen -1 und -2%" {
@@ -446,7 +446,7 @@ func TestParseNumSpellNameFormatterVitaRange(t *testing.T) {
 	diceNum := 0
 	diceSide := 300
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, true, &frNumSigned, &frNumSigned)
 
 	if output != "0 bis 300 Vitalität" {
@@ -459,7 +459,7 @@ func TestParseNumSpellNameFormatterSingle(t *testing.T) {
 	diceNum := 1
 	diceSide := 0
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Austauschbar ab: 1" {
@@ -472,7 +472,7 @@ func TestParseNumSpellNameFormatterMinMax(t *testing.T) {
 	diceNum := 2
 	diceSide := 5
 	value := 6
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "Verbleib. Anwendungen: 5 / 6" {
 		t.Errorf("output is not as expected: %s", output)
@@ -484,7 +484,7 @@ func TestParseNumSpellNameFormatterSpellDiceNum(t *testing.T) {
 	diceNum := 15960
 	diceSide := 0
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Zauberwurf: Mauschelei" {
@@ -497,7 +497,7 @@ func TestParseNumSpellNameFormatterEffectsRange(t *testing.T) {
 	diceNum := 25
 	diceSide := 50
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "-25 bis -50 Luftschaden" {
@@ -510,7 +510,7 @@ func TestParseNumSpellNameFormatterMissingWhite(t *testing.T) {
 	diceNum := 1
 	diceSide := 0
 	value := 0
-	frNumSigned := 2
+	frNumSigned := 0
 
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "1 level" {

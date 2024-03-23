@@ -46,11 +46,11 @@ type MappedMultilangSetReverseLink struct {
 }
 
 type MappedMultilangSet struct {
-	AnkamaId int                       `json:"ankama_id"`
-	Name     map[string]string         `json:"name"`
-	ItemIds  []int                     `json:"items"`
-	Effects  [][]MappedMultilangEffect `json:"effects"`
-	Level    int                       `json:"level"`
+	AnkamaId int                          `json:"ankama_id"`
+	Name     map[string]string            `json:"name"`
+	ItemIds  []int                        `json:"items"`
+	Effects  [][]MappedMultilangSetEffect `json:"effects"`
+	Level    int                          `json:"level"`
 }
 
 type MappedMultilangMount struct {
@@ -64,6 +64,18 @@ type MappedMultilangMount struct {
 type MappedMultilangCharacteristic struct {
 	Value map[string]string `json:"value"`
 	Name  map[string]string `json:"name"`
+}
+
+type MappedMultilangSetEffect struct {
+	Min              int               `json:"min"`
+	Max              int               `json:"max"`
+	Type             map[string]string `json:"type"`
+	MinMaxIrrelevant int               `json:"min_max_irrelevant"`
+	Templated        map[string]string `json:"templated"`
+	ElementId        int               `json:"element_id"`
+	IsMeta           bool              `json:"is_meta"`
+	Active           bool              `json:"active"`
+	ItemCombination  uint              `json:"item_combination"`
 }
 
 type MappedMultilangEffect struct {
@@ -232,10 +244,10 @@ func (i JSONGameItemPossibleEffect) GetID() int {
 }
 
 type JSONGameSet struct {
-	Id      int                            `json:"id"`
-	ItemIds []int                          `json:"items"`
-	NameId  int                            `json:"nameId"`
-	Effects [][]JSONGameItemPossibleEffect `json:"effects"`
+	Id      int                             `json:"id"`
+	ItemIds []int                           `json:"items"`
+	NameId  int                             `json:"nameId"`
+	Effects [][]*JSONGameItemPossibleEffect `json:"effects"`
 }
 
 func (i JSONGameSet) GetID() int {
@@ -279,21 +291,21 @@ type JSONGameItem struct {
 	NameId        int `json:"nameId"`
 	Level         int `json:"level"`
 
-	PossibleEffects        []JSONGameItemPossibleEffect `json:"possibleEffects"`
-	RecipeIds              []int                        `json:"recipeIds"`
-	Pods                   int                          `json:"realWeight"`
-	ParseEffects           bool                         `json:"useDice"`
-	EvolutiveEffectIds     []int                        `json:"evolutiveEffectIds"`
-	DropMonsterIds         []int                        `json:"dropMonsterIds"`
-	ItemSetId              int                          `json:"itemSetId"`
-	Criteria               string                       `json:"criteria"`
-	CriticalHitBonus       int                          `json:"criticalHitBonus"`
-	TwoHanded              bool                         `json:"twoHanded"`
-	MaxCastPerTurn         int                          `json:"maxCastPerTurn"`
-	ApCost                 int                          `json:"apCost"`
-	Range                  int                          `json:"range"`
-	MinRange               int                          `json:"minRange"`
-	CriticalHitProbability int                          `json:"criticalHitProbability"`
+	PossibleEffects        []*JSONGameItemPossibleEffect `json:"possibleEffects"`
+	RecipeIds              []int                         `json:"recipeIds"`
+	Pods                   int                           `json:"realWeight"`
+	ParseEffects           bool                          `json:"useDice"`
+	EvolutiveEffectIds     []int                         `json:"evolutiveEffectIds"`
+	DropMonsterIds         []int                         `json:"dropMonsterIds"`
+	ItemSetId              int                           `json:"itemSetId"`
+	Criteria               string                        `json:"criteria"`
+	CriticalHitBonus       int                           `json:"criticalHitBonus"`
+	TwoHanded              bool                          `json:"twoHanded"`
+	MaxCastPerTurn         int                           `json:"maxCastPerTurn"`
+	ApCost                 int                           `json:"apCost"`
+	Range                  int                           `json:"range"`
+	MinRange               int                           `json:"minRange"`
+	CriticalHitProbability int                           `json:"criticalHitProbability"`
 }
 
 func (i JSONGameItem) GetID() int {
@@ -312,10 +324,10 @@ func (i JSONGameBreed) GetID() int {
 }
 
 type JSONGameMount struct {
-	Id       int                          `json:"id"`
-	FamilyId int                          `json:"familyId"`
-	NameId   int                          `json:"nameId"`
-	Effects  []JSONGameItemPossibleEffect `json:"effects"`
+	Id       int                           `json:"id"`
+	FamilyId int                           `json:"familyId"`
+	NameId   int                           `json:"nameId"`
+	Effects  []*JSONGameItemPossibleEffect `json:"effects"`
 }
 
 func (i JSONGameMount) GetID() int {

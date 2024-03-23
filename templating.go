@@ -95,8 +95,8 @@ func SingularPluralFormatter(input string, amount int, lang string) string {
 	return str
 }
 
-func ElementFromCode(code string) int {
-	code = strings.ToLower(code)
+func ElementFromCode(codeUndef string) int {
+	code := strings.ToLower(codeUndef)
 
 	switch code {
 	case "cs":
@@ -112,7 +112,11 @@ func ElementFromCode(code string) int {
 	case "cw":
 		return 501946 // "Wisdom"
 	case "pk":
-		return 422874 // "Set-Bonus"
+		if codeUndef == "PK" {
+			return 66438 //  "Kamas"
+		} else {
+			return 422874 // "Set-Bonus"
+		}
 	case "pl":
 		return 837224 // "Mindestens Stufe %1"
 	case "cm":
@@ -144,7 +148,7 @@ func ConditionWithOperator(input string, operator string, langs *map[string]Lang
 	if rawElement == -1 {
 		return false
 	}
-	out.Element = strings.ToLower(partSplit[0])
+	out.Element = partSplit[0]
 	out.Value, _ = strconv.Atoi(partSplit[1])
 	for _, lang := range Languages {
 		langStr := (*langs)[lang].Texts[rawElement]
@@ -190,7 +194,7 @@ func ConditionWithOperator(input string, operator string, langs *map[string]Lang
 }
 
 // NumSpellFormatter returns info about min max with in. -1 "only_min", -2 "no_min_max"
-func NumSpellFormatter(input string, lang string, gameData *JSONGameData, langs *map[string]LangDict, diceNum *int, diceSide *int, value *int, effectNameId int, numIsSpell bool, useDice bool) (string, int) {
+func NumSpellFormatter(input string, lang string, gameData *JSONGameData, langs *map[string]LangDict, diceNum *int, diceSide *int, value *int, effectNameId int, numIsSpell bool, useDice bool, frNumSigned *int, frSideSigned *int) (string, int) {
 	diceNumIsSpellId := *diceNum > 12000 || numIsSpell
 	diceSideIsSpellId := *diceSide > 12000
 	valueIsSpellId := *value > 12000
@@ -206,7 +210,30 @@ func NumSpellFormatter(input string, lang string, gameData *JSONGameData, langs 
 	delValue := false
 
 	input, concatRegex := PrepareAndCreateRangeRegex(input, true)
-	numSigned, sideSigned := ParseSigness(input)
+	var numSigned bool
+	var sideSigned bool
+	var ptSideSigned bool
+	_, ptSideSigned = ParseSigness(input)
+	if *frNumSigned != 2 || *frSideSigned != 2 { // 2 is unset, 0 is false, 1 is true
+		numSigned = *frNumSigned == 1
+		sideSigned = *frSideSigned == 1
+	} else {
+		if lang == "fr" {
+			numSigned, sideSigned = ParseSigness(input)
+			if numSigned {
+				*frNumSigned = 1
+			} else {
+				*frNumSigned = 0
+			}
+			if sideSigned {
+				*frSideSigned = 1
+			} else {
+				*frSideSigned = 0
+			}
+		} else {
+			log.Fatalf("frNumSigned and frSideSigned must be set for %s", lang)
+		}
+	}
 	concatEntries := concatRegex.FindAllStringSubmatch(input, -1)
 
 	if *diceSide == 0 { // only replace #1 with dice_num
@@ -239,7 +266,11 @@ func NumSpellFormatter(input string, lang string, gameData *JSONGameData, langs 
 			diceSideStr = (*langs)[lang].Texts[gameData.spells[*diceSide].NameId]
 			//del_dice_side = true
 		} else {
-			diceSideStr = fmt.Sprint(*diceSide)
+			if sideSigned && lang == "pt" && !ptSideSigned {
+				diceSideStr = fmt.Sprintf("-%d", *diceSide)
+			} else {
+				diceSideStr = fmt.Sprint(*diceSide)
+			}
 		}
 		input = strings.ReplaceAll(input, "#2", diceSideStr)
 	}

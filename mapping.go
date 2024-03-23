@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var Languages = []string{"de", "en", "es", "fr", "it", "pt"}
+var Languages = []string{"fr", "en", "de", "es", "it", "pt"}
 
 func MapSets(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangSet {
 	var mappedSets []MappedMultilangSet
@@ -15,7 +15,7 @@ func MapSets(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangSe
 		var mappedSet MappedMultilangSet
 		mappedSet.AnkamaId = set.Id
 		mappedSet.ItemIds = set.ItemIds
-		mappedSet.Effects = ParseEffects(data, set.Effects, langs)
+		mappedSet.Effects = ParseItemCombo(set.Effects, ParseEffects(data, set.Effects, langs))
 
 		highestLevel := 0
 		for _, item := range set.ItemIds {
@@ -78,7 +78,9 @@ func MapMounts(data *JSONGameData, langs *map[string]LangDict) []MappedMultilang
 			mappedMount.FamilyName[lang] = (*langs)[lang].Texts[data.MountFamilys[mount.FamilyId].NameId]
 		}
 
-		allEffectResult := ParseEffects(data, [][]JSONGameItemPossibleEffect{mount.Effects}, langs)
+		effectsArr := make([][]*JSONGameItemPossibleEffect, 1)
+		effectsArr[0] = mount.Effects
+		allEffectResult := ParseEffects(data, effectsArr, langs)
 		if len(allEffectResult) > 0 {
 			mappedMount.Effects = allEffectResult[0]
 		}
@@ -120,7 +122,7 @@ func MapAlmanax(data *JSONGameData, langs *map[string]LangDict) []MappedMultilan
 			}
 		}
 		if !found {
-			log.Fatal(fmt.Sprintf("Could not find almanax calendar for NPC %d", questObjectiveNpc))
+			log.Fatalf("Could not find almanax calendar for NPC %d", questObjectiveNpc)
 		}
 
 		var mappedNPCAlmanax MappedMultilangNPCAlmanax
@@ -206,7 +208,9 @@ func MapItems(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangI
 		}
 
 		mappedItems[idx].UsedInRecipes = item.RecipeIds
-		allEffectResult := ParseEffects(data, [][]JSONGameItemPossibleEffect{item.PossibleEffects}, langs)
+		effectsArr := make([][]*JSONGameItemPossibleEffect, 1)
+		effectsArr[0] = item.PossibleEffects
+		allEffectResult := ParseEffects(data, effectsArr, langs)
 		if len(allEffectResult) > 0 {
 			mappedItems[idx].Effects = allEffectResult[0]
 		}

@@ -140,11 +140,51 @@ func PersistElements(elementPath string, itemTypePath string) error {
 	return nil
 }
 
-func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect, langs *map[string]LangDict) [][]MappedMultilangEffect {
+func ParseItemCombo(rawEffects [][]*JSONGameItemPossibleEffect, effects [][]MappedMultilangEffect) [][]MappedMultilangSetEffect {
+	var mappedEffects [][]MappedMultilangSetEffect
+	i := 0
+	for itemComboCounter, effectsPerCombo := range rawEffects {
+		var mappedEffectsPerCombo []MappedMultilangSetEffect
+
+		j := 0
+		for _, effect := range effectsPerCombo {
+			if effect == nil {
+				continue
+			}
+
+			parsedEffects := effects[i]
+			parsedEffect := parsedEffects[j]
+			setEffect := MappedMultilangSetEffect{
+				Min:              parsedEffect.Min,
+				Max:              parsedEffect.Max,
+				Type:             parsedEffect.Type,
+				Templated:        parsedEffect.Templated,
+				Active:           parsedEffect.Active,
+				ElementId:        parsedEffect.ElementId,
+				IsMeta:           parsedEffect.IsMeta,
+				MinMaxIrrelevant: parsedEffect.MinMaxIrrelevant,
+				ItemCombination:  uint(itemComboCounter + 1),
+			}
+			mappedEffectsPerCombo = append(mappedEffectsPerCombo, setEffect)
+			j += 1
+		}
+		if len(mappedEffectsPerCombo) > 0 {
+			mappedEffects = append(mappedEffects, mappedEffectsPerCombo)
+			i += 1
+		}
+	}
+	return mappedEffects
+}
+
+func ParseEffects(data *JSONGameData, allEffects [][]*JSONGameItemPossibleEffect, langs *map[string]LangDict) [][]MappedMultilangEffect {
 	var mappedAllEffects [][]MappedMultilangEffect
 	for _, effects := range allEffects {
 		var mappedEffects []MappedMultilangEffect
 		for _, effect := range effects {
+
+			if effect == nil {
+				continue
+			}
 
 			var mappedEffect MappedMultilangEffect
 			currentEffect := data.effects[effect.EffectId]
@@ -162,6 +202,8 @@ func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect,
 			mappedEffect.Type = make(map[string]string)
 			mappedEffect.Templated = make(map[string]string)
 			var minMaxRemove int
+			var frNumSigned int = 2  // unset
+			var frSideSigned int = 2 // unset
 			for _, lang := range Languages {
 				var diceNum int
 				var diceSide int
@@ -187,7 +229,7 @@ func ParseEffects(data *JSONGameData, allEffects [][]JSONGameItemPossibleEffect,
 					mappedEffect.IsMeta = true
 				} else {
 					templatedName := effectName
-					templatedName, minMaxRemove = NumSpellFormatter(templatedName, lang, data, langs, &diceNum, &diceSide, &value, currentEffect.DescriptionId, numIsSpell, currentEffect.UseDice)
+					templatedName, minMaxRemove = NumSpellFormatter(templatedName, lang, data, langs, &diceNum, &diceSide, &value, currentEffect.DescriptionId, numIsSpell, currentEffect.UseDice, &frNumSigned, &frSideSigned)
 					if templatedName == "" { // found effect that should be discarded for now
 						break
 					}

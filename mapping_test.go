@@ -341,7 +341,8 @@ func TestParseNumSpellNameFormatterItSpecial(t *testing.T) {
 	diceNum := 100
 	diceSide := 233
 	value := 0
-	output, _ := NumSpellFormatter(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Ottieni: 100 - 233 kama" {
 		t.Errorf("output is not as expected: %s", output)
@@ -361,7 +362,8 @@ func TestParseNumSpellNameFormatterItSpecialSwitch(t *testing.T) {
 	diceNum := 100
 	diceSide := 36
 	value := 0
-	output, _ := NumSpellFormatter(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "36: +100 EP" {
 		t.Errorf("output is not as expected: %s", output)
@@ -381,7 +383,8 @@ func TestParseNumSpellNameFormatterLearnSpellLevel(t *testing.T) {
 	diceNum := 0
 	diceSide := 0
 	value := 1746
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Stufe 1746 des Zauberspruchs erlernen" {
 		t.Errorf("output is not as expected: %s", output)
@@ -393,7 +396,8 @@ func TestParseNumSpellNameFormatterLearnSpellLevel1(t *testing.T) {
 	diceNum := 0
 	diceSide := 1
 	value := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Stufe 1 des Zauberspruchs erlernen" {
 		t.Errorf("output is not as expected: %s", output)
@@ -405,7 +409,8 @@ func TestParseNumSpellNameFormatterDeNormal(t *testing.T) {
 	diceNum := 100
 	diceSide := 233
 	value := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "100 bis 233 Kamagewinn" {
 		t.Errorf("output is not as expected: %s", output)
@@ -417,7 +422,8 @@ func TestParseNumSpellNameFormatterMultiValues(t *testing.T) {
 	diceNum := 1
 	diceSide := 2
 	value := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Erfolgschance zwischen 1 und 2%" {
 		t.Errorf("output is not as expected: %s", output)
@@ -427,7 +433,8 @@ func TestParseNumSpellNameFormatterMultiValues(t *testing.T) {
 	diceNum = 1
 	diceSide = 2
 	value = 0
-	output, _ = NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned = 2
+	output, _ = NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Erfolgschance zwischen -1 und -2%" {
 		t.Errorf("output is not as expected: %s", output)
@@ -439,7 +446,8 @@ func TestParseNumSpellNameFormatterVitaRange(t *testing.T) {
 	diceNum := 0
 	diceSide := 300
 	value := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, true)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, true, &frNumSigned, &frNumSigned)
 
 	if output != "0 bis 300 Vitalität" {
 		t.Errorf("output is not as expected: %s", output)
@@ -451,7 +459,8 @@ func TestParseNumSpellNameFormatterSingle(t *testing.T) {
 	diceNum := 1
 	diceSide := 0
 	value := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Austauschbar ab: 1" {
 		t.Errorf("output is not as expected: %s", output)
@@ -463,7 +472,8 @@ func TestParseNumSpellNameFormatterMinMax(t *testing.T) {
 	diceNum := 2
 	diceSide := 5
 	value := 6
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "Verbleib. Anwendungen: 5 / 6" {
 		t.Errorf("output is not as expected: %s", output)
 	}
@@ -474,7 +484,8 @@ func TestParseNumSpellNameFormatterSpellDiceNum(t *testing.T) {
 	diceNum := 15960
 	diceSide := 0
 	value := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	frNumSigned := 2
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Zauberwurf: Mauschelei" {
 		t.Errorf("output is not as expected: %s", output)
@@ -486,8 +497,9 @@ func TestParseNumSpellNameFormatterEffectsRange(t *testing.T) {
 	diceNum := 25
 	diceSide := 50
 	value := 0
+	frNumSigned := 2
 
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "-25 bis -50 Luftschaden" {
 		t.Errorf("output is not as expected: %s", output)
 	}
@@ -498,8 +510,9 @@ func TestParseNumSpellNameFormatterMissingWhite(t *testing.T) {
 	diceNum := 1
 	diceSide := 0
 	value := 0
+	frNumSigned := 2
 
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false)
+	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "1 level" {
 		t.Errorf("output is not as expected: %s", output)
 	}

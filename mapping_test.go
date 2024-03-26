@@ -481,13 +481,13 @@ func TestParseNumSpellNameFormatterMinMax(t *testing.T) {
 
 func TestParseNumSpellNameFormatterSpellDiceNum(t *testing.T) {
 	input := "Zauberwurf: #1"
-	diceNum := 15960
+	diceNum := 12548
 	diceSide := 0
 	value := 0
 	frNumSigned := 0
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
-	if output != "Zauberwurf: Mauschelei" {
+	if output != "Zauberwurf: Geisterklaue" {
 		t.Errorf("output is not as expected: %s", output)
 	}
 }

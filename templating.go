@@ -317,6 +317,10 @@ func NumSpellFormatter(input string, lang string, gameData *JSONGameData, langs 
 		*diceSide *= -1
 	}
 
+	if *diceNum < 0 && *diceSide < 0 {
+		*diceNum, *diceSide = *diceSide, *diceNum
+	}
+
 	return input, onlyNoMinMax
 }
 

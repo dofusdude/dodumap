@@ -319,6 +319,21 @@ func NumSpellFormatter(input string, lang string, gameData *JSONGameData, langs 
 
 	if *diceNum < 0 && *diceSide < 0 {
 		*diceNum, *diceSide = *diceSide, *diceNum
+
+		diceSideFmt := fmt.Sprint((*diceSide) * -1)
+		diceNumFmt := fmt.Sprint((*diceNum) * -1)
+
+		input = strings.ReplaceAll(input, diceSideFmt, "-diceSideFmt-")
+		input = strings.ReplaceAll(input, diceNumFmt, diceSideFmt)
+		input = strings.ReplaceAll(input, "-diceSideFmt-", diceNumFmt)
+
+		if !strings.Contains(input, "-"+diceSideFmt) {
+			input = strings.ReplaceAll(input, diceSideFmt, "-"+diceSideFmt)
+		}
+
+		if !strings.Contains(input, "-"+diceNumFmt) {
+			input = strings.ReplaceAll(input, diceNumFmt, "-"+diceNumFmt)
+		}
 	}
 
 	return input, onlyNoMinMax

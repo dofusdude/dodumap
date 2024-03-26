@@ -433,10 +433,10 @@ func TestParseNumSpellNameFormatterMultiValues(t *testing.T) {
 	diceNum = 1
 	diceSide = 2
 	value = 0
-	frNumSigned = 0
+	frNumSigned = 1
 	output, _ = NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
-	if output != "Erfolgschance zwischen -1 und -2%" {
+	if output != "Erfolgschance zwischen -2 und -1%" {
 		t.Errorf("output is not as expected: %s", output)
 	}
 }
@@ -497,10 +497,18 @@ func TestParseNumSpellNameFormatterEffectsRange(t *testing.T) {
 	diceNum := 25
 	diceSide := 50
 	value := 0
-	frNumSigned := 0
+	frNumSigned := 1
 
 	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
-	if output != "-25 bis -50 Luftschaden" {
+	if diceNum != -50 {
+		t.Errorf("diceNum is not as expected: %d", diceNum)
+	}
+
+	if diceSide != -25 {
+		t.Errorf("diceSide is not as expected: %d", diceSide)
+	}
+
+	if output != "-50 bis -25 Luftschaden" {
 		t.Errorf("output is not as expected: %s", output)
 	}
 }

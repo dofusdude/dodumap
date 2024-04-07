@@ -95,6 +95,14 @@ func MapMounts(data *JSONGameData, langs *map[string]LangDict) []MappedMultilang
 	return mappedMounts
 }
 
+func questKamasReward(maxLevel int, optimalLevel int, kamasRatio float64, duration float64, scaleWithPlayerLevel bool) int {
+	lvl := optimalLevel
+	if scaleWithPlayerLevel {
+		lvl = maxLevel
+	}
+	return int((float64(lvl*lvl+20*lvl-20) * kamasRatio * duration))
+}
+
 func MapAlmanax(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangNPCAlmanax {
 	var mappedAlmanax []MappedMultilangNPCAlmanax
 
@@ -108,8 +116,15 @@ func MapAlmanax(data *JSONGameData, langs *map[string]LangDict) []MappedMultilan
 		objective := data.questObjectives[step.ObjectiveIds[0]].Parameters
 		item := data.Items[objective.Parameter1]
 		itemQuantity := objective.Parameter2
+		stepRewards := data.questStepRewards[step.RewardsIds[0]]
 
-		rewardKamas := int(data.questStepRewards[step.RewardsIds[0]].KamasRatio * 43980.0)
+		kamasRatio := stepRewards.KamasRatio
+		maxLevel := stepRewards.LevelMax
+		kamasScaleWithPlayerLevel := stepRewards.KamasScaleWithPlayerLevel
+		duration := step.Duration
+		optimalLevel := step.OptimalLevel
+
+		rewardKamas := questKamasReward(maxLevel, optimalLevel, kamasRatio, duration, kamasScaleWithPlayerLevel)
 		questObjectiveNpc := data.questObjectives[step.ObjectiveIds[2]].Parameters.Parameter0
 
 		var currAlm JSONGameAlamanaxCalendar

@@ -17,12 +17,21 @@ func MapSets(data *JSONGameData, langs *map[string]LangDict) []MappedMultilangSe
 		mappedSet.ItemIds = set.ItemIds
 		mappedSet.Effects = ParseItemCombo(set.Effects, ParseEffects(data, set.Effects, langs))
 
+		allItemsCosmetic := len(set.ItemIds) > 0
+
 		highestLevel := 0
 		for _, item := range set.ItemIds {
 			if data.Items[item].Level > highestLevel {
 				highestLevel = data.Items[item].Level
 			}
+
+			// 5 == "cosmetic"
+			if data.ItemTypes[data.Items[item].TypeId].CategoryId != 5 {
+				allItemsCosmetic = false
+			}
 		}
+
+		mappedSet.IsCosmetic = allItemsCosmetic
 		mappedSet.Level = highestLevel
 
 		mappedSet.Name = make(map[string]string)

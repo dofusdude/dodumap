@@ -46,11 +46,12 @@ type MappedMultilangSetReverseLink struct {
 }
 
 type MappedMultilangSet struct {
-	AnkamaId int                          `json:"ankama_id"`
-	Name     map[string]string            `json:"name"`
-	ItemIds  []int                        `json:"items"`
-	Effects  [][]MappedMultilangSetEffect `json:"effects"`
-	Level    int                          `json:"level"`
+	AnkamaId   int                          `json:"ankama_id"`
+	Name       map[string]string            `json:"name"`
+	ItemIds    []int                        `json:"items"`
+	Effects    [][]MappedMultilangSetEffect `json:"effects"`
+	Level      int                          `json:"level"`
+	IsCosmetic bool                         `json:"is_cosmetic"`
 }
 
 type MappedMultilangMount struct {

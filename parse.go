@@ -555,7 +555,7 @@ func CleanJSON(jsonStr string) string {
 }
 
 func ParseRawDataPart[T HasId](fileSource string, result chan map[int]T, dir string) {
-	file, err := os.ReadFile(filepath.Join(dir, "data", fileSource))
+	file, err := os.ReadFile(filepath.Join(dir, fileSource))
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -722,7 +722,7 @@ func ParseRawData(dir string) *JSONGameData {
 func ParseLangDict(langCode string, dir string) LangDict {
 	var err error
 
-	dataPath := filepath.Join(dir, "data", "languages")
+	dataPath := filepath.Join(dir, "languages")
 	var data LangDict
 	data.IdText = make(map[int]int)
 	data.Texts = make(map[int]string)

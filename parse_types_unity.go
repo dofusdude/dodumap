@@ -1,5 +1,39 @@
 package dodumap
 
+// changes: removed twoHanded and conditions
+type MappedMultilangItemUnity struct {
+	AnkamaId               int                             `json:"ankama_id"`
+	Type                   MappedMultilangItemType         `json:"type"`
+	Description            map[string]string               `json:"description"`
+	Name                   map[string]string               `json:"name"`
+	Image                  string                          `json:"image"`
+	Conditions             *ConditionTreeNodeMapped        `json:"conditions"`
+	Level                  int                             `json:"level"`
+	UsedInRecipes          []int                           `json:"used_in_recipes"`
+	Characteristics        []MappedMultilangCharacteristic `json:"characteristics"`
+	Effects                []MappedMultilangEffect         `json:"effects"`
+	DropMonsterIds         []int                           `json:"dropMonsterIds"`
+	CriticalHitBonus       int                             `json:"criticalHitBonus"`
+	MaxCastPerTurn         int                             `json:"maxCastPerTurn"`
+	ApCost                 int                             `json:"apCost"`
+	Range                  int                             `json:"range"`
+	MinRange               int                             `json:"minRange"`
+	CriticalHitProbability int                             `json:"criticalHitProbability"`
+	Pods                   int                             `json:"pods"`
+	IconId                 int                             `json:"iconId"`
+	ParentSet              MappedMultilangSetReverseLink   `json:"parentSet"`
+	HasParentSet           bool                            `json:"hasParentSet"`
+}
+
+type MappedMultilangSetUnity struct {
+	AnkamaId   int                             `json:"ankama_id"`
+	Name       map[string]string               `json:"name"`
+	ItemIds    []int                           `json:"items"`
+	Effects    map[int][]MappedMultilangEffect `json:"effects"`
+	Level      int                             `json:"level"`
+	IsCosmetic bool                            `json:"is_cosmetic"`
+}
+
 func (i JSONGameSetUnityRaw) GetID() int {
 	return i.Id
 }
@@ -14,7 +48,7 @@ type JSONGameSetUnityRaw struct {
 	}] `json:"effects"`
 }
 
-func (i *JSONGameSetUnityRaw) Merge(other [][]JSONGameItemPossibleEffectUnity) JSONGameSetUnity {
+func (i *JSONGameSetUnityRaw) Merge(other [][]*JSONGameItemPossibleEffectUnity) JSONGameSetUnity {
 	return JSONGameSetUnity{
 		Id:      i.Id,
 		NameId:  i.NameId,
@@ -30,9 +64,9 @@ func (i JSONGameSetUnity) GetID() int {
 type JSONGameSetUnity struct {
 	Id int `json:"id"`
 	//BonusIsSecret int                        `json:"bonusIsSecret"` // always 0, maybe used in the future
-	ItemIds []int                               `json:"items"`
-	NameId  int                                 `json:"nameId"`
-	Effects [][]JSONGameItemPossibleEffectUnity `json:"effects"`
+	ItemIds []int                                `json:"items"`
+	NameId  int                                  `json:"nameId"`
+	Effects [][]*JSONGameItemPossibleEffectUnity `json:"effects"`
 }
 
 type JsonGameUnityRefLookup[T any, A any] struct {
@@ -41,7 +75,7 @@ type JsonGameUnityRefLookup[T any, A any] struct {
 }
 
 type JsonGameUnityRef struct {
-	Ref int64 `json:"rid"`
+	Ref string `json:"rid"`
 }
 
 type JSONGameUnityArray[T any] struct {
@@ -90,22 +124,22 @@ type JSONGameItemUnity struct {
 	NameId        int `json:"nameId"`
 	Level         int `json:"level"`
 
-	PossibleEffects        []JSONGameItemPossibleEffectUnity `json:"possibleEffects"`
-	RecipeIds              JSONGameUnityAnkamaIdArray        `json:"recipeIds"`
-	Pods                   int                               `json:"realWeight"`
-	EvolutiveEffectIds     JSONGameUnityAnkamaIdArray        `json:"evolutiveEffectIds"`
-	DropMonsterIds         JSONGameUnityAnkamaIdArray        `json:"dropMonsterIds"`
-	ItemSetId              int                               `json:"itemSetId"`
-	Criteria               string                            `json:"criteria"`
-	CriticalHitBonus       int                               `json:"criticalHitBonus"`
-	MaxCastPerTurn         int                               `json:"maxCastPerTurn"`
-	ApCost                 int                               `json:"apCost"`
-	Range                  int                               `json:"range"`
-	MinRange               int                               `json:"minRange"`
-	CriticalHitProbability int                               `json:"criticalHitProbability"`
+	PossibleEffects        []*JSONGameItemPossibleEffectUnity `json:"possibleEffects"`
+	RecipeIds              JSONGameUnityAnkamaIdArray         `json:"recipeIds"`
+	Pods                   int                                `json:"realWeight"`
+	EvolutiveEffectIds     JSONGameUnityAnkamaIdArray         `json:"evolutiveEffectIds"`
+	DropMonsterIds         JSONGameUnityAnkamaIdArray         `json:"dropMonsterIds"`
+	ItemSetId              int                                `json:"itemSetId"`
+	Criteria               string                             `json:"criteria"`
+	CriticalHitBonus       int                                `json:"criticalHitBonus"`
+	MaxCastPerTurn         int                                `json:"maxCastPerTurn"`
+	ApCost                 int                                `json:"apCost"`
+	Range                  int                                `json:"range"`
+	MinRange               int                                `json:"minRange"`
+	CriticalHitProbability int                                `json:"criticalHitProbability"`
 }
 
-func (i *JSONGameItemUnityRaw) Merge(other []JSONGameItemPossibleEffectUnity) JSONGameItemUnity {
+func (i *JSONGameItemUnityRaw) Merge(other []*JSONGameItemPossibleEffectUnity) JSONGameItemUnity {
 	return JSONGameItemUnity{
 		Id:                     i.Id,
 		TypeId:                 i.TypeId,
@@ -195,7 +229,7 @@ func (i JSONGameMountUnityRaw) GetID() int {
 	return i.Id
 }
 
-func (i *JSONGameMountUnityRaw) Merge(other []JSONGameItemPossibleEffectUnity) JSONGameMountUnity {
+func (i *JSONGameMountUnityRaw) Merge(other []*JSONGameItemPossibleEffectUnity) JSONGameMountUnity {
 	return JSONGameMountUnity{
 		Id:            i.Id,
 		FamilyId:      i.FamilyId,
@@ -206,11 +240,11 @@ func (i *JSONGameMountUnityRaw) Merge(other []JSONGameItemPossibleEffectUnity) J
 }
 
 type JSONGameMountUnity struct {
-	Id            int                               `json:"id"`
-	FamilyId      int                               `json:"familyId"`
-	NameId        int                               `json:"nameId"`
-	Effects       []JSONGameItemPossibleEffectUnity `json:"effects"`
-	CertificateId int                               `json:"certificateId"`
+	Id            int                                `json:"id"`
+	FamilyId      int                                `json:"familyId"`
+	NameId        int                                `json:"nameId"`
+	Effects       []*JSONGameItemPossibleEffectUnity `json:"effects"`
+	CertificateId int                                `json:"certificateId"`
 }
 
 func (i JSONGameMountUnity) GetID() int {
@@ -254,11 +288,15 @@ func (i JSONGameMountFamilyUnity) GetID() int {
 }
 
 type JSONGameNPCUnity struct {
-	Id             int     `json:"id"`
-	NameId         int     `json:"nameId"`
-	DialogMessages [][]int `json:"dialogMessages"`
-	DialogReplies  [][]int `json:"dialogReplies"`
-	Actions        []int   `json:"actions"`
+	Id             int `json:"id"`
+	NameId         int `json:"nameId"`
+	DialogMessages JSONGameUnityArray[struct {
+		Values JSONGameUnityAnkamaIdArray `json:"values"`
+	}] `json:"dialogMessages"`
+	DialogReplies JSONGameUnityArray[struct {
+		Values JSONGameUnityAnkamaIdArray `json:"values"`
+	}] `json:"dialogReplies"`
+	Actions JSONGameUnityAnkamaIdArray `json:"actions"`
 }
 
 func (i JSONGameNPCUnity) GetID() int {
@@ -312,13 +350,23 @@ func (i JSONGameQuestStepUnity) GetID() int {
 	return i.Id
 }
 
+type JSONGameQuestParameterUnity struct {
+	DungeonOnly int `json:"dungeonOnly"` // bool
+	NumParams   int `json:"numParams"`
+	Parameter0  int `json:"parameter0"`
+	Parameter1  int `json:"parameter1"`
+	Parameter2  int `json:"parameter2"`
+	Parameter3  int `json:"parameter3"`
+	Parameter4  int `json:"parameter4"`
+}
+
 type JSONGameQuestObjectiveUnity struct {
-	Id         int                    `json:"id"`
-	Coords     JSONGameCoordinate     `json:"coords"`
-	MapId      int                    `json:"mapId"`
-	Parameters JSONGameQuestParameter `json:"parameters"`
-	StepId     int                    `json:"stepId"`
-	TypeId     int                    `json:"typeId"`
+	Id         int                         `json:"id"`
+	Coords     JSONGameCoordinate          `json:"coords"`
+	MapId      int                         `json:"mapId"`
+	Parameters JSONGameQuestParameterUnity `json:"parameters"`
+	StepId     int                         `json:"stepId"`
+	TypeId     int                         `json:"typeId"`
 }
 
 func (i JSONGameQuestObjectiveUnity) GetID() int {
@@ -385,6 +433,43 @@ func (i JSONGameItemPossibleEffectUnity) GetID() int {
 	return i.EffectId
 }
 
+type JSONLangDictUnity struct {
+	Texts map[string]string `json:"entries"` // "1": "Account- oder Abohandel",
+}
+
+type LangDictUnity struct {
+	Texts map[int]string `json:"entries"` // 1: "Account- oder Abohandel",
+}
+
+type JSONGameSpellUnity struct {
+	Id            int                        `json:"id"`
+	NameId        int                        `json:"nameId"`
+	DescriptionId int                        `json:"descriptionId"`
+	TypeId        int                        `json:"typeId"`
+	Order         int                        `json:"order"`
+	IconId        int                        `json:"iconId"`
+	SpellLevels   JSONGameUnityAnkamaIdArray `json:"spellLevels"`
+}
+
+func (i JSONGameSpellUnity) GetID() int {
+	return i.Id
+}
+
+type JSONGameAreaUnity struct {
+	Id              int                `json:"id"`
+	NameId          int                `json:"nameId"`
+	SuperAreaId     int                `json:"superAreaId"`
+	ContainHouses   int                `json:"containHouses"`   // bool
+	ContainPaddocks int                `json:"containPaddocks"` // bool
+	Bounds          JSONGameAreaBounds `json:"bounds"`
+	WorldmapId      int                `json:"worldmapId"`
+	HasWorldMap     int                `json:"hasWorldMap"` // bool
+}
+
+func (i JSONGameAreaUnity) GetID() int {
+	return i.Id
+}
+
 type JSONGameDataUnity struct {
 	Items     map[int]JSONGameItemUnity
 	Sets      map[int]JSONGameSetUnity
@@ -392,9 +477,9 @@ type JSONGameDataUnity struct {
 	effects   map[int]JSONGameEffectUnity
 	bonuses   map[int]JSONGameBonusUnity
 	Recipes   map[int]JSONGameRecipeUnity
-	/*spells           map[int]JSONGameSpell
-	spellTypes       map[int]JSONGameSpellType
-	areas            map[int]JSONGameArea*/
+	spells    map[int]JSONGameSpellUnity
+	//spellTypes       map[int]JSONGameSpellType
+	areas            map[int]JSONGameAreaUnity
 	Mounts           map[int]JSONGameMountUnity
 	classes          map[int]JSONGameBreedUnity
 	MountFamilys     map[int]JSONGameMountFamilyUnity

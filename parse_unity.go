@@ -469,7 +469,7 @@ func ParseEffectsUnity(data *JSONGameDataUnity, allEffects [][]*JSONGameItemPoss
 					if templatedName == "" { // found effect that should be discarded for now
 						break
 					}
-					templatedName = SingularPluralFormatter(templatedName, effect.MinimumValue, lang)
+					templatedName = SingularPluralFormatterUnity(templatedName, effect.MinimumValue, lang)
 
 					if isTitle { // titles are Title: 0 after formatting; TODO move this into the NumSpellFormatter
 						maleTitleNum, err := strconv.Atoi(data.titles[diceNum].NameMaleId) // TODO male default, idk how to make it neutral yet
@@ -483,8 +483,8 @@ func ParseEffectsUnity(data *JSONGameDataUnity, allEffects [][]*JSONGameItemPoss
 						templatedName = strings.ReplaceAll(templatedName, "0", replTitle)
 					}
 
-					effectName = DeleteDamageFormatter(effectName)
-					effectName = SingularPluralFormatter(effectName, effect.MinimumValue, lang)
+					effectName = DeleteDamageFormatterUnity(effectName)
+					effectName = SingularPluralFormatterUnity(effectName, 1, lang) // singularize the effect name for comparisons
 
 					if isTitle {
 						mappedEffect.Min = 0

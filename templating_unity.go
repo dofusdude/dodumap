@@ -2,12 +2,91 @@ package dodumap
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
+
+func DeleteDamageFormatterUnity(input string) string {
+	input, regex := PrepareAndCreateRangeRegexUnity(input, false)
+	if strings.Contains(input, "+#1{{~1~2 to }} level #2") {
+		return "level"
+	}
+
+	input = strings.ReplaceAll(input, "#1{{~1~2 -}}#2", "#1{{~1~2 - }}#2") // bug from ankama
+	input = regex.ReplaceAllString(input, "")
+
+	input = strings.ReplaceAll(input, "{{~1~2 to }}", "")
+	input = DeleteReplacer(input)
+	input = strings.ReplaceAll(input, "  ", " ")
+
+	input = strings.TrimSpace(input)
+	return input
+}
+
+func SingularPluralFormatterUnity(input string, amount int, lang string) string {
+	str := input
+	str = strings.ReplaceAll(str, "{{~s}}", "") // avoid only s without what to append
+	str = strings.ReplaceAll(str, "{{~p}}", "") // same
+
+	// delete unknown z
+	unknownZRegex := regexp.MustCompile("{{~z[^}]*}}")
+	str = unknownZRegex.ReplaceAllString(str, "")
+
+	var indicator rune
+
+	if amount > 1 {
+		indicator = 'p'
+	} else {
+		indicator = 's'
+	}
+
+	indicators := []rune{'s', 'p'}
+	var regexps []*regexp.Regexp
+	for _, indicatorIt := range indicators {
+		regex := fmt.Sprintf("{{~%c([^}]*)}}", indicatorIt) // capturing with everything inside ()
+		regexExtract := regexp.MustCompile(regex)
+		regexps = append(regexps, regexExtract)
+
+		//	if lang == "es" || lang == "pt" {
+		if indicatorIt != indicator {
+			continue
+		}
+
+		if lang == "de" {
+			regexExtract.ReplaceAllString(str, "") // german templating is just a mess so remove it
+			continue
+		}
+
+		extractedEntries := regexExtract.FindAllStringSubmatch(str, -1)
+		for _, extracted := range extractedEntries {
+			str = strings.ReplaceAll(str, extracted[0], extracted[1])
+		}
+	}
+
+	for _, regexIt := range regexps {
+		str = regexIt.ReplaceAllString(str, "")
+	}
+
+	return str
+}
+
+func PrepareAndCreateRangeRegexUnity(input string, extract bool) (string, *regexp.Regexp) {
+	var regexStr string
+	combiningWords := "(und|et|and|bis|to|a|à|-|auf)"
+	if extract {
+		regexStr = fmt.Sprintf("{{~1~2 (%s [-,+]?)}}", combiningWords)
+	} else {
+		regexStr = fmt.Sprintf("[-,+]?#1{{~1~2 %s [-,+]?}}#2", combiningWords)
+	}
+
+	concatRegex := regexp.MustCompile(regexStr)
+
+	return PrepareTextForRegex(input), concatRegex
+}
 
 func ConditionWithOperatorUnity(input string, operator string, langs *map[string]LangDictUnity, out *MappedMultilangCondition, data *JSONGameDataUnity) bool {
 	partSplit := strings.Split(input, operator)
@@ -17,7 +96,7 @@ func ConditionWithOperatorUnity(input string, operator string, langs *map[string
 	}
 	out.Element = partSplit[0]
 	out.Value, _ = strconv.Atoi(partSplit[1])
-	for _, lang := range Languages {
+	for _, lang := range LanguagesUnity {
 		langStr := (*langs)[lang].Texts[rawElement]
 
 		if lang == "en" {
@@ -75,7 +154,7 @@ func NumSpellFormatterUnity(input string, lang string, gameData *JSONGameDataUni
 
 	delValue := false
 
-	input, concatRegex := PrepareAndCreateRangeRegex(input, true)
+	input, concatRegex := PrepareAndCreateRangeRegexUnity(input, true)
 	var numSigned bool
 	var sideSigned bool
 	var ptSideSigned bool

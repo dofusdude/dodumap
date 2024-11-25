@@ -58,7 +58,9 @@ func MapItemsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []M
 			PersistedTypes.NextId++
 		}
 
-		mappedItems[idx].UsedInRecipes = item.RecipeIds.Array
+		if len(item.RecipeIds.Array) > 0 {
+			mappedItems[idx].UsedInRecipes = item.RecipeIds.Array
+		}
 		effectsArr := make([][]*JSONGameItemPossibleEffectUnity, 1)
 		effectsArr[0] = item.PossibleEffects
 		allEffectResult := ParseEffectsUnity(data, effectsArr, langs)
@@ -76,7 +78,9 @@ func MapItemsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []M
 		mappedItems[idx].CriticalHitBonus = item.CriticalHitBonus
 		mappedItems[idx].ApCost = item.ApCost
 		mappedItems[idx].MaxCastPerTurn = item.MaxCastPerTurn
-		mappedItems[idx].DropMonsterIds = item.DropMonsterIds.Array
+		if len(item.DropMonsterIds.Array) > 0 {
+			mappedItems[idx].DropMonsterIds = item.DropMonsterIds.Array
+		}
 		mappedItems[idx].HasParentSet = item.ItemSetId != -1
 		if mappedItems[idx].HasParentSet {
 			mappedItems[idx].ParentSet.Id = item.ItemSetId
@@ -244,7 +248,10 @@ func MapSetsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []Ma
 		mappedSet.ItemIds = set.ItemIds
 		parseEffects := ParseEffectsUnity(data, set.Effects, langs)
 
-		mappedSet.Effects = ParseItemComboUnity(parseEffects)
+		parseCombi := ParseItemComboUnity(parseEffects)
+		if len(parseCombi) > 0 {
+			mappedSet.Effects = parseCombi
+		}
 
 		allItemsCosmetic := len(set.ItemIds) > 0
 

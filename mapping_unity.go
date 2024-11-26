@@ -254,6 +254,7 @@ func MapSetsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []Ma
 		}
 
 		allItemsCosmetic := len(set.ItemIds) > 0
+		mappedSet.ContainsCosmetics = false
 
 		highestLevel := 0
 		for _, item := range set.ItemIds {
@@ -262,12 +263,14 @@ func MapSetsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []Ma
 			}
 
 			// 5 == "cosmetic"
-			if data.ItemTypes[data.Items[item].TypeId].CategoryId != 5 {
+			if data.ItemTypes[data.Items[item].TypeId].CategoryId == 5 {
+				mappedSet.ContainsCosmetics = true
+			} else {
 				allItemsCosmetic = false
 			}
 		}
 
-		mappedSet.IsCosmetic = allItemsCosmetic
+		mappedSet.ContainsCosmeticsOnly = allItemsCosmetic
 		mappedSet.Level = highestLevel
 
 		mappedSet.Name = make(map[string]string)

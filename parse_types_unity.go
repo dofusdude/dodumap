@@ -26,12 +26,13 @@ type MappedMultilangItemUnity struct {
 }
 
 type MappedMultilangSetUnity struct {
-	AnkamaId   int                             `json:"ankama_id"`
-	Name       map[string]string               `json:"name"`
-	ItemIds    []int                           `json:"items"`
-	Effects    map[int][]MappedMultilangEffect `json:"effects"`
-	Level      int                             `json:"level"`
-	IsCosmetic bool                            `json:"is_cosmetic"`
+	AnkamaId              int                             `json:"ankama_id"`
+	Name                  map[string]string               `json:"name"`
+	ItemIds               []int                           `json:"items"`
+	Effects               map[int][]MappedMultilangEffect `json:"effects"`
+	Level                 int                             `json:"level"`
+	ContainsCosmetics     bool                            `json:"contains_cosmetics"`
+	ContainsCosmeticsOnly bool                            `json:"contains_cosmetics_only"`
 }
 
 func (i JSONGameSetUnityRaw) GetID() int {

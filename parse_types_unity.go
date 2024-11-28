@@ -157,6 +157,10 @@ func (i *JSONGameItemUnityRaw) Merge(other []*JSONGameItemPossibleEffectUnity) J
 		Criteria:               i.Criteria,
 		CriticalHitBonus:       i.CriticalHitBonus,
 		CriticalHitProbability: i.CriticalHitProbability,
+		ApCost:                 i.ApCost,
+		MaxCastPerTurn:         i.MaxCastPerTurn,
+		Range:                  i.Range,
+		MinRange:               i.MinRange,
 	}
 }
 

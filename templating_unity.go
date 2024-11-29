@@ -158,13 +158,13 @@ func NumSpellFormatterUnity(input string, lang string, gameData *JSONGameDataUni
 	var numSigned bool
 	var sideSigned bool
 	var ptSideSigned bool
-	_, ptSideSigned = ParseSigness(input)
+	_, ptSideSigned = ParseSignessUnity(input)
 	if *frNumSigned != 2 || *frSideSigned != 2 { // 2 is unset, 0 is false, 1 is true
 		numSigned = *frNumSigned == 1
 		sideSigned = *frSideSigned == 1
 	} else {
 		if lang == "fr" {
-			numSigned, sideSigned = ParseSigness(input)
+			numSigned, sideSigned = ParseSignessUnity(input)
 			if numSigned {
 				*frNumSigned = 1
 			} else {
@@ -282,4 +282,31 @@ func NumSpellFormatterUnity(input string, lang string, gameData *JSONGameDataUni
 	}
 
 	return input, onlyNoMinMax
+}
+
+func ParseSignessUnity(input string) (bool, bool) {
+	numSigness := false
+	sideSigness := false
+
+	regexNum := regexp.MustCompile("(([+,-])?#1)")
+	entriesNum := regexNum.FindAllStringSubmatch(input, -1)
+	for _, extracted := range entriesNum {
+		for _, entry := range extracted {
+			if entry == "-" {
+				numSigness = true
+			}
+		}
+	}
+
+	regexSide := regexp.MustCompile("([+,-])?(}})?#2")
+	entriesSide := regexSide.FindAllStringSubmatch(input, -1)
+	for _, extracted := range entriesSide {
+		for _, entry := range extracted {
+			if entry == "-" {
+				sideSigness = true
+			}
+		}
+	}
+
+	return numSigness, sideSigness
 }

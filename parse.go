@@ -27,11 +27,15 @@ var (
 	PersistedTypes    PersistentStringKeysMap
 )
 
-func LoadPersistedElements(persistenceDir string, release string) error {
+func LoadPersistedElements(persistenceDir string, release string, majorVersion int) error {
 	var elements []string
 	var types []string
+	dofus3prefix := ""
+	if majorVersion == 3 {
+		dofus3prefix = ".dofus3"
+	}
 	if persistenceDir == "" {
-		elementUrl := fmt.Sprintf("https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/elements.%s.json", release)
+		elementUrl := fmt.Sprintf("https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/elements%s.%s.json", dofus3prefix, release)
 		elementResponse, err := http.Get(elementUrl)
 		if err != nil {
 			log.Fatal(err)
@@ -47,7 +51,7 @@ func LoadPersistedElements(persistenceDir string, release string) error {
 			log.Fatal(err)
 		}
 
-		itemTypeUrl := fmt.Sprintf("https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/item_types.%s.json", release)
+		itemTypeUrl := fmt.Sprintf("https://raw.githubusercontent.com/dofusdude/doduda/main/persistent/item_types%s.%s.json", dofus3prefix, release)
 		itemTypeResponse, err := http.Get(itemTypeUrl)
 		if err != nil {
 			log.Fatal(err)
@@ -63,7 +67,7 @@ func LoadPersistedElements(persistenceDir string, release string) error {
 			log.Fatal(err)
 		}
 	} else {
-		data, err := os.ReadFile(filepath.Join(persistenceDir, fmt.Sprintf("elements.%s.json", release)))
+		data, err := os.ReadFile(filepath.Join(persistenceDir, fmt.Sprintf("elements%s.%s.json", dofus3prefix, release)))
 		if err != nil {
 			return err
 		}
@@ -73,7 +77,7 @@ func LoadPersistedElements(persistenceDir string, release string) error {
 			fmt.Println(err)
 		}
 
-		data, err = os.ReadFile(filepath.Join(persistenceDir, fmt.Sprintf("item_types.%s.json", release)))
+		data, err = os.ReadFile(filepath.Join(persistenceDir, fmt.Sprintf("item_types%s.%s.json", dofus3prefix, release)))
 		if err != nil {
 			return err
 		}

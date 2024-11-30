@@ -518,6 +518,10 @@ func ParseEffectsUnity(data *JSONGameDataUnity, allEffects [][]*JSONGameItemPoss
 				mappedEffect.Active = true
 			}
 			searchTypeEn := mappedEffect.Type["en"]
+			// TODO this is a hack since the beta has probably a typo that changed the ID of the element
+			if searchTypeEn == "Air damage" {
+				searchTypeEn = "Air Damage"
+			}
 			if mappedEffect.Active {
 				searchTypeEn += " (Active)"
 			}

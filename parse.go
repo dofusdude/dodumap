@@ -30,6 +30,9 @@ var (
 func LoadPersistedElements(persistenceDir string, release string, majorVersion int) error {
 	var elements []string
 	var types []string
+	if release == "dofus3" {
+		release = "main"
+	}
 	dofus3prefix := ""
 	if majorVersion == 3 {
 		dofus3prefix = ".dofus3"

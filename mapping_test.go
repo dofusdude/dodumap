@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	}
 	TestingLangs = ParseRawLanguages(path)
 	TestingData = ParseRawData(path)
-	err = LoadPersistedElements(filepath.Join(path, "persistent"), "main")
+	err = LoadPersistedElements(filepath.Join(path, "persistent"), "main", 2)
 	if err != nil {
 		log.Fatal(err)
 	}

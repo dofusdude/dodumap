@@ -25,6 +25,20 @@ type MappedMultilangItemUnity struct {
 	HasParentSet           bool                            `json:"hasParentSet"`
 }
 
+type MappedMultilangNPCAlmanaxUnity struct {
+	OfferingReceiver string   `json:"offeringReceiver"`
+	Days             []string `json:"days"`
+	Offering         struct {
+		ItemId         int               `json:"itemId"`
+		ItemCategoryId int               `json:"itemCategoryId"`
+		ItemName       map[string]string `json:"itemName"`
+		Quantity       int               `json:"quantity"`
+	}
+	Bonus       map[string]string `json:"bonus"`
+	BonusType   map[string]string `json:"bonusType"`
+	RewardKamas int               `json:"rewardKamas"`
+}
+
 type MappedMultilangSetUnity struct {
 	AnkamaId              int                             `json:"ankama_id"`
 	Name                  map[string]string               `json:"name"`

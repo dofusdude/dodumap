@@ -134,8 +134,8 @@ func MapMountsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []
 	return mappedMounts
 }
 
-func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []MappedMultilangNPCAlmanax {
-	var mappedAlmanax []MappedMultilangNPCAlmanax
+func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []MappedMultilangNPCAlmanaxUnity {
+	var mappedAlmanax []MappedMultilangNPCAlmanaxUnity
 
 	for _, almCat := range data.questCategories[31].QuestIds.Array {
 		quest := data.quests[almCat]
@@ -146,6 +146,8 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 		step := data.questSteps[quest.StepIds.Array[0]]
 		objective := data.questObjectives[step.ObjectiveIds.Array[0]].Parameters
 		item := data.Items[objective.Parameter1]
+		itemCategoryId := data.ItemTypes[item.TypeId].CategoryId
+
 		itemQuantity := objective.Parameter2
 		stepRewards := data.questStepRewards[step.RewardsIds.Array[0]]
 
@@ -178,7 +180,7 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 			log.Fatalf("Could not find almanax calendar for NPC %d", questObjectiveNpc)
 		}
 
-		var mappedNPCAlmanax MappedMultilangNPCAlmanax
+		var mappedNPCAlmanax MappedMultilangNPCAlmanaxUnity
 		mappedNPCAlmanax.OfferingReceiver = (*langs)["en"].Texts[quest.NameId][13:] // remove "Offering to ". The name is the same in all languages.
 		itemNames := make(map[string]string)
 		mappedNPCAlmanax.Bonus = make(map[string]string)
@@ -196,16 +198,10 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 			mappedNPCAlmanax.Bonus[lang] = strings.ReplaceAll(mappedNPCAlmanax.Bonus[lang], "</b>", "")
 		}
 		mappedNPCAlmanax.Offering.ItemId = item.Id
+		mappedNPCAlmanax.Offering.ItemCategoryId = itemCategoryId
 		mappedNPCAlmanax.Offering.ItemName = itemNames
 		mappedNPCAlmanax.Offering.Quantity = itemQuantity
 		mappedNPCAlmanax.RewardKamas = rewardKamas
-
-		ImgBaseUrl := "https://api.dofusdu.de/dofus2/img/item/" + strconv.Itoa(item.IconId)
-		mappedNPCAlmanax.Offering.ImageUrls.HD = ImgBaseUrl + "-800.png"
-		mappedNPCAlmanax.Offering.ImageUrls.HQ = ImgBaseUrl + "-400.png"
-		mappedNPCAlmanax.Offering.ImageUrls.SD = ImgBaseUrl + "-200.png"
-		mappedNPCAlmanax.Offering.ImageUrls.Icon = ImgBaseUrl + ".png"
-
 		mappedAlmanax = append(mappedAlmanax, mappedNPCAlmanax)
 	}
 

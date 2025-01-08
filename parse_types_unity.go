@@ -33,7 +33,7 @@ type MappedMultilangNPCAlmanaxUnity struct {
 		ItemCategoryId int               `json:"itemCategoryId"`
 		ItemName       map[string]string `json:"itemName"`
 		Quantity       int               `json:"quantity"`
-	}
+	} `json:"offering"`
 	Bonus       map[string]string `json:"bonus"`
 	BonusType   map[string]string `json:"bonusType"`
 	RewardKamas int               `json:"rewardKamas"`

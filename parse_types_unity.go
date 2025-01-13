@@ -34,9 +34,10 @@ type MappedMultilangNPCAlmanaxUnity struct {
 		ItemName       map[string]string `json:"itemName"`
 		Quantity       int               `json:"quantity"`
 	} `json:"offering"`
-	Bonus       map[string]string `json:"bonus"`
-	BonusType   map[string]string `json:"bonusType"`
-	RewardKamas int               `json:"rewardKamas"`
+	Bonus           map[string]string `json:"bonus"`
+	BonusType       map[string]string `json:"bonusType"`
+	RewardKamas     int               `json:"rewardKamas"`
+	ExperienceRatio float64           `json:"experienceRatio"`
 }
 
 type MappedMultilangSetUnity struct {

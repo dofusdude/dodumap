@@ -165,6 +165,7 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 		optimalLevel := step.OptimalLevel
 
 		rewardKamas := questKamasReward(maxLevel, optimalLevel, kamasRatio, duration, kamasScaleWithPlayerLevel)
+		experienceRatio := stepRewards.ExperienceRatio
 		questObjectiveNpc := data.questObjectives[step.ObjectiveIds.Array[2]].Parameters.Parameter0
 
 		var currAlm JSONGameAlamanaxCalendarUnity
@@ -202,6 +203,7 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 		mappedNPCAlmanax.Offering.ItemName = itemNames
 		mappedNPCAlmanax.Offering.Quantity = itemQuantity
 		mappedNPCAlmanax.RewardKamas = rewardKamas
+		mappedNPCAlmanax.ExperienceRatio = experienceRatio
 		mappedAlmanax = append(mappedAlmanax, mappedNPCAlmanax)
 	}
 

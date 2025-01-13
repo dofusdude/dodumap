@@ -182,6 +182,10 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 		}
 
 		var mappedNPCAlmanax MappedMultilangNPCAlmanaxUnity
+		mappedNPCAlmanax.OptimalLevel = optimalLevel
+		mappedNPCAlmanax.Duration = duration
+		mappedNPCAlmanax.ExperienceRatio = experienceRatio
+
 		mappedNPCAlmanax.OfferingReceiver = (*langs)["en"].Texts[quest.NameId][13:] // remove "Offering to ". The name is the same in all languages.
 		itemNames := make(map[string]string)
 		mappedNPCAlmanax.Bonus = make(map[string]string)
@@ -203,7 +207,6 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 		mappedNPCAlmanax.Offering.ItemName = itemNames
 		mappedNPCAlmanax.Offering.Quantity = itemQuantity
 		mappedNPCAlmanax.RewardKamas = rewardKamas
-		mappedNPCAlmanax.ExperienceRatio = experienceRatio
 		mappedAlmanax = append(mappedAlmanax, mappedNPCAlmanax)
 	}
 

@@ -113,30 +113,30 @@ func ElementFromCode(codeUndef string) int {
 		return 501946 // "Wisdom"
 	case "pk":
 		if codeUndef == "PK" {
-			return 66438 //  "Kamas"
+			return 862811 //  "Kamas"
 		} else {
-			return 422874 // "Set-Bonus"
+			return 1092135 // "Set-Bonus"
 		}
 	case "pl":
-		return 837224 // "Mindestens Stufe %1"
+		return 1096588 // "Be level {0} or higher"
 	case "cm":
-		return 67248 // "Bewegungsp. (BP)"
+		return 1143881 // "Movement Points (MP)"
 	case "cp":
-		return 67755 // "Aktionsp. (AP)"
+		return 1143880 // "Action Points (AP)"
 	case "po":
-		return 335357 // Anderes Gebiet als: %1
+		return 1092470 // "Different area to: {0}"
 	case "pf":
-		return 644231 // Nicht ausgerüstetes %1-Reittier
+		return 1095105 // "{0} not equipped"
 	//case "": // Ps=1
 	//	return 644230 // Ausgerüstetes %1-Reittier
 	case "pa":
-		return 66566 // Gesinunngsstufe
+		return 1093891 // "Alignment level"
 	//case "":
 	//	return 637203 // Kein ausgerüstetes %1-Reittier haben
 	case "of":
-		return 637212 // Ein ausgerüstetes %1-Reittier haben
+		return 1094822 // "Have a {0} mount equipped"
 	case "pz":
-		return 66351 // Abonniert sein
+		return 1093970 // "Be subscribed"
 	}
 
 	return -1

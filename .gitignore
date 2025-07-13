@@ -1,0 +1,6 @@
+doduda
+data/*
+persistent/
+manifest.json
+*.tar.gz
+.DS_Store

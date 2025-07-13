@@ -120,9 +120,9 @@ func ElementFromCode(codeUndef string) int {
 	case "pl":
 		return 1096588 // "Be level {0} or higher"
 	case "cm":
-		return 1143881 // "Movement Points (MP)"
+		return 501874 // "Movement Points (MP)"
 	case "cp":
-		return 1143880 // "Action Points (AP)"
+		return 501948 // "Action Points (AP)"
 	case "po":
 		return 1092470 // "Different area to: {0}"
 	case "pf":

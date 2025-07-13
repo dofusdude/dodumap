@@ -432,6 +432,7 @@ type JSONGameAlamanaxCalendarUnity struct {
 	NameId     int                        `json:"nameId"`
 	NpcId      int                        `json:"npcId"`
 	BonusesIds JSONGameUnityAnkamaIdArray `json:"bonusesIds"`
+	// Dates      *JSONGameUnityArray[string] `json:"dates"` // NOTE: Added with 3.2. Keep optional to support also <3.2
 }
 
 func (i JSONGameAlamanaxCalendarUnity) GetID() int {

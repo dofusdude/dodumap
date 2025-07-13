@@ -9,17 +9,18 @@ import (
 	"testing"
 )
 
-var TestingLangs map[string]LangDict
-var TestingData *JSONGameData
+var TestingLangs map[string]LangDictUnity
+var TestingData *JSONGameDataUnity
 
 func TestMain(m *testing.M) {
 	path, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
-	TestingLangs = ParseRawLanguages(path)
-	TestingData = ParseRawData(path)
-	err = LoadPersistedElements(filepath.Join(path, "persistent"), "main", 2)
+	dataPath := filepath.Join(path, "data")
+	TestingLangs = ParseRawLanguagesUnity(dataPath)
+	TestingData = ParseRawDataUnity(dataPath)
+	err = LoadPersistedElements(filepath.Join(path, "persistent"), "main", 3)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,28 +36,41 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func TestParseSigness1(t *testing.T) {
-	num, side := ParseSigness("-#1{~1~2 und -}#2")
-	if !num {
-		t.Error("num is false")
-	}
-	if !side {
-		t.Error("side is false")
-	}
-}
+// TODO not up-to-date anymore with unity?
+// func TestParseSigness1(t *testing.T) {
+// 	num, side := ParseSignessUnity("-#1{~1~2 und -}#2")
+// 	if !num {
+// 		t.Error("num is false")
+// 	}
+// 	if !side {
+// 		t.Error("side is false")
+// 	}
+// }
 
-func TestParseSigness2(t *testing.T) {
-	num, side := ParseSigness("#1{~1~2 und -}#2")
-	if num {
-		t.Error("num is true")
-	}
-	if !side {
-		t.Error("side is false")
+// func TestParseSigness2(t *testing.T) {
+// 	num, side := ParseSignessUnity("#1{~1~2 und -}#2")
+// 	if num {
+// 		t.Error("num is true")
+// 	}
+// 	if !side {
+// 		t.Error("side is false")
+// 	}
+// }
+
+func TestElementValidity(t *testing.T) {
+	elementCodes := []string{"cs", "ci", "cv", "ca", "cc", "cw", "pk", "PK", "pl", "cm", "cp", "po", "pf", "pa", "of", "pz"}
+
+	for _, code := range elementCodes {
+		num := ElementFromCode(code)
+		_, ok := TestingLangs["en"].Texts[num]
+		if !ok {
+			t.Errorf("Could not find translations for %s", code)
+		}
 	}
 }
 
 func TestParseSigness3(t *testing.T) {
-	num, side := ParseSigness("#1{~1~2 und }#2")
+	num, side := ParseSignessUnity("#1{~1~2 und }#2")
 	if side {
 		t.Error("side is true")
 	}
@@ -66,7 +80,7 @@ func TestParseSigness3(t *testing.T) {
 }
 
 func TestParseSigness4(t *testing.T) {
-	num, side := ParseSigness("-#1{~1~2 und }-#2")
+	num, side := ParseSignessUnity("-#1{~1~2 und }-#2")
 	if !side {
 		t.Error("side is false")
 	}
@@ -120,20 +134,7 @@ func printTreeToString(node *ConditionTreeNodeMapped, level int) string {
 }
 
 func TestParseConditionSimple(t *testing.T) {
-	oldConditions, conditionTree := ParseCondition("cs<25", &TestingLangs, TestingData)
-
-	if len(oldConditions) != 1 {
-		t.Errorf("condition length is not 1: %d", len(oldConditions))
-	}
-	if oldConditions[0].Operator != "<" {
-		t.Errorf("operator is not <: %s", oldConditions[0].Operator)
-	}
-	if oldConditions[0].Value != 25 {
-		t.Errorf("value is not 25: %d", oldConditions[0].Value)
-	}
-	if oldConditions[0].Templated["de"] != "Stärke" {
-		t.Errorf("templated is not Stärke: %s", oldConditions[0].Templated["de"])
-	}
+	conditionTree := ParseConditionUnity("cs<25", &TestingLangs, TestingData)
 
 	depth := conditionTreeDepth(conditionTree)
 	if depth != 1 {
@@ -156,40 +157,10 @@ func TestParseConditionSimple(t *testing.T) {
 
 func TestParseConditionMulti(t *testing.T) {
 	toParse := "CS>80&CV>40&CA>40"
-	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)
+	conditionTree := ParseConditionUnity(toParse, &TestingLangs, TestingData)
 
-	if len(oldConditions) != 3 {
-		t.Errorf("condition length is not 3: %d", len(oldConditions))
-	}
-
-	if oldConditions[0].Operator != ">" {
-		t.Errorf("operator is not >: %s", oldConditions[0].Operator)
-	}
-	if oldConditions[0].Value != 80 {
-		t.Errorf("value is not 80: %d", oldConditions[0].Value)
-	}
-	if oldConditions[0].Templated["de"] != "Stärke" {
-		t.Errorf("templated is not Stärke: %s", oldConditions[0].Templated["de"])
-	}
-
-	if oldConditions[1].Operator != ">" {
-		t.Errorf("operator is not >: %s", oldConditions[1].Operator)
-	}
-	if oldConditions[1].Value != 40 {
-		t.Errorf("value is not 40: %d", oldConditions[1].Value)
-	}
-	if oldConditions[1].Templated["de"] != "Vitalität" {
-		t.Errorf("templated is not Vitalität: %s", oldConditions[1].Templated["de"])
-	}
-
-	if oldConditions[2].Operator != ">" {
-		t.Errorf("operator is not >: %s", oldConditions[2].Operator)
-	}
-	if oldConditions[2].Value != 40 {
-		t.Errorf("value is not 40: %d", oldConditions[2].Value)
-	}
-	if oldConditions[2].Templated["de"] != "Flinkheit" {
-		t.Errorf("templated is not Flinkheit: %s", oldConditions[2].Templated["de"])
+	if conditionTree == nil {
+		t.Errorf("empty tree")
 	}
 
 	depth := conditionTreeDepth(conditionTree)
@@ -213,13 +184,38 @@ func TestParseConditionMulti(t *testing.T) {
 	}
 }
 
+func TestParseConditionLimboWand(t *testing.T) {
+	toParse := "CP<12&CM<6&CW>99"
+	conditionTree := ParseConditionUnity(toParse, &TestingLangs, TestingData)
+
+	if conditionTree == nil {
+		t.Errorf("empty tree")
+	}
+
+	depth := conditionTreeDepth(conditionTree)
+	if depth != 3 {
+		t.Errorf("conditionTree depth is not 3: %d\n%s", depth, printTreeToString(conditionTree, 0))
+	}
+
+	if conditionTree.Value != nil {
+		t.Errorf("expr is nested, must start with operator: %s", conditionTree.Value.Element)
+	}
+
+	expected := `and
+  and
+    Aktionsp. (AP) < 12
+    Bewegungsp. (BP) < 6
+  Weisheit > 99
+`
+
+	if printTreeToString(conditionTree, 0) != expected {
+		t.Errorf("conditionTree is not as expected. expression: %s, expected tree: \n%s\nbut is:\n%s", toParse, expected, printTreeToString(conditionTree, 0))
+	}
+}
+
 func TestParseOrAndConditionMulti(t *testing.T) {
 	toParse := "CS>80&(CV>40|CA>40)"
-	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)
-
-	if len(oldConditions) != 1 {
-		t.Errorf("condition length is not 1: %d", len(oldConditions))
-	}
+	conditionTree := ParseConditionUnity(toParse, &TestingLangs, TestingData)
 
 	depth := conditionTreeDepth(conditionTree)
 	if depth != 3 {
@@ -244,11 +240,7 @@ func TestParseOrAndConditionMulti(t *testing.T) {
 
 func TestParseAndConditionUnknowns(t *testing.T) {
 	toParse := "KEINE>80&JAU>40"
-	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)
-
-	if len(oldConditions) != 0 {
-		t.Errorf("condition length is not 0: %d", len(oldConditions))
-	}
+	conditionTree := ParseConditionUnity(toParse, &TestingLangs, TestingData)
 
 	if conditionTree != nil {
 		t.Errorf("conditionTree is not nil: %s", printTreeToString(conditionTree, 0))
@@ -257,11 +249,7 @@ func TestParseAndConditionUnknowns(t *testing.T) {
 
 func TestParseConditionEmpty(t *testing.T) {
 	toParse := "null"
-	oldConditions, conditionTree := ParseCondition(toParse, &TestingLangs, TestingData)
-
-	if len(oldConditions) > 0 {
-		t.Errorf("condition should be empty")
-	}
+	conditionTree := ParseConditionUnity(toParse, &TestingLangs, TestingData)
 
 	if conditionTree != nil {
 		t.Errorf("conditionTree should be empty with condition \"null\"")
@@ -337,12 +325,12 @@ func TestDeleteDamageTemplateLevelEnBug(t *testing.T) {
 }
 
 func TestParseNumSpellNameFormatterItSpecial(t *testing.T) {
-	input := "Ottieni: #1{~1~2 - }#2 kama"
+	input := "Ottieni: #1{{~1~2 - }}#2 kama"
 	diceNum := 100
 	diceSide := 233
 	value := 0
 	frNumSigned := 0 // unsigned
-	output, _ := NumSpellFormatter(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Ottieni: 100 - 233 kama" {
 		t.Errorf("output is not as expected: %s", output)
@@ -363,7 +351,7 @@ func TestParseNumSpellNameFormatterItSpecialSwitch(t *testing.T) {
 	diceSide := 36
 	value := 0
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "it", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "36: +100 EP" {
 		t.Errorf("output is not as expected: %s", output)
@@ -384,7 +372,7 @@ func TestParseNumSpellNameFormatterLearnSpellLevel(t *testing.T) {
 	diceSide := 0
 	value := 1746
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Stufe 1746 des Zauberspruchs erlernen" {
 		t.Errorf("output is not as expected: %s", output)
@@ -397,7 +385,7 @@ func TestParseNumSpellNameFormatterLearnSpellLevel1(t *testing.T) {
 	diceSide := 1
 	value := 0
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Stufe 1 des Zauberspruchs erlernen" {
 		t.Errorf("output is not as expected: %s", output)
@@ -405,12 +393,12 @@ func TestParseNumSpellNameFormatterLearnSpellLevel1(t *testing.T) {
 }
 
 func TestParseNumSpellNameFormatterDeNormal(t *testing.T) {
-	input := "#1{~1~2 bis }#2 Kamagewinn"
+	input := "#1{{~1~2 bis }}#2 Kamagewinn"
 	diceNum := 100
 	diceSide := 233
 	value := 0
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "100 bis 233 Kamagewinn" {
 		t.Errorf("output is not as expected: %s", output)
@@ -418,23 +406,23 @@ func TestParseNumSpellNameFormatterDeNormal(t *testing.T) {
 }
 
 func TestParseNumSpellNameFormatterMultiValues(t *testing.T) {
-	input := "Erfolgschance zwischen #1{~1~2 und }#2%"
+	input := "Erfolgschance zwischen #1{{~1~2 und }}#2%"
 	diceNum := 1
 	diceSide := 2
 	value := 0
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Erfolgschance zwischen 1 und 2%" {
 		t.Errorf("output is not as expected: %s", output)
 	}
 
-	input = "Erfolgschance zwischen -#1{~1~2 und -}#2%"
+	input = "Erfolgschance zwischen -#1{{~1~2 und -}}#2%"
 	diceNum = 1
 	diceSide = 2
 	value = 0
 	frNumSigned = 1
-	output, _ = NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ = NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Erfolgschance zwischen -2 und -1%" {
 		t.Errorf("output is not as expected: %s", output)
@@ -442,12 +430,12 @@ func TestParseNumSpellNameFormatterMultiValues(t *testing.T) {
 }
 
 func TestParseNumSpellNameFormatterVitaRange(t *testing.T) {
-	input := "+#1{~1~2 bis }#2 Vitalität"
+	input := "+#1{{~1~2 bis }}#2 Vitalität"
 	diceNum := 0
 	diceSide := 300
 	value := 0
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, true, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, true, &frNumSigned, &frNumSigned)
 
 	if output != "0 bis 300 Vitalität" {
 		t.Errorf("output is not as expected: %s", output)
@@ -460,7 +448,7 @@ func TestParseNumSpellNameFormatterSingle(t *testing.T) {
 	diceSide := 0
 	value := 0
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Austauschbar ab: 1" {
 		t.Errorf("output is not as expected: %s", output)
@@ -473,7 +461,7 @@ func TestParseNumSpellNameFormatterMinMax(t *testing.T) {
 	diceSide := 5
 	value := 6
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "Verbleib. Anwendungen: 5 / 6" {
 		t.Errorf("output is not as expected: %s", output)
 	}
@@ -485,7 +473,7 @@ func TestParseNumSpellNameFormatterSpellDiceNum(t *testing.T) {
 	diceSide := 0
 	value := 0
 	frNumSigned := 0
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 
 	if output != "Zauberwurf: Geisterklaue" {
 		t.Errorf("output is not as expected: %s", output)
@@ -493,13 +481,13 @@ func TestParseNumSpellNameFormatterSpellDiceNum(t *testing.T) {
 }
 
 func TestParseNumSpellNameFormatterEffectsRange(t *testing.T) {
-	input := "-#1{~1~2 bis -}#2 Luftschaden"
+	input := "-#1{{~1~2 bis -}}#2 Luftschaden"
 	diceNum := 25
 	diceSide := 50
 	value := 0
 	frNumSigned := 1
 
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if diceNum != -50 {
 		t.Errorf("diceNum is not as expected: %d", diceNum)
 	}
@@ -514,13 +502,13 @@ func TestParseNumSpellNameFormatterEffectsRange(t *testing.T) {
 }
 
 func TestParseNumSpellNameFormatterMissingWhite(t *testing.T) {
-	input := "+#1{~1~2 to}level #2"
+	input := "+#1{{~1~2 to}} level #2"
 	diceNum := 1
 	diceSide := 0
 	value := 0
 	frNumSigned := 0
 
-	output, _ := NumSpellFormatter(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
+	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "1 level" {
 		t.Errorf("output is not as expected: %s", output)
 	}

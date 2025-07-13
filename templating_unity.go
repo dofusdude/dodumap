@@ -88,16 +88,76 @@ func PrepareAndCreateRangeRegexUnity(input string, extract bool) (string, *regex
 	return PrepareTextForRegex(input), concatRegex
 }
 
+// NOTE: When changing here, also needs changes in ConditionWithOperatorUnity lower function body because some special cases of replacments
+func ElementFromCodeUnity(codeUndef string) []int {
+	code := strings.ToLower(codeUndef)
+
+	switch code {
+	case "cs":
+		return []int{501945} // "Strength"
+	case "ci":
+		return []int{501944} // "Intelligence"
+	case "cv":
+		return []int{501947} // "Vitality"
+	case "ca":
+		return []int{501941} // "Agility"
+	case "cc":
+		return []int{501942} // "Chance"
+	case "cw":
+		return []int{501946} // "Wisdom"
+	case "pk":
+		if codeUndef == "PK" {
+			return []int{862811} //  "Kamas"
+		} else {
+			return []int{1092135} // "Set-Bonus"
+		}
+	case "pl":
+		return []int{1096588} // "Be level {0} or higher"
+	case "cm":
+		return []int{501874, 1143881} // "Movement Points (MP)" TODO one of them vanishes
+	case "cp":
+		return []int{501948, 1143880} // "Action Points (AP)" TODO one of them vanished
+	case "po":
+		return []int{1092470} // "Different area to: {0}"
+	case "pf":
+		return []int{1095105} // "{0} not equipped"
+	//case "": // Ps=1
+	//	return 644230 // Ausgerüstetes %1-Reittier
+	case "pa":
+		return []int{1093891} // "Alignment level"
+	//case "":
+	//	return 637203 // Kein ausgerüstetes %1-Reittier haben
+	case "of":
+		return []int{1094822} // "Have a {0} mount equipped"
+	case "pz":
+		return []int{1093970} // "Be subscribed"
+	}
+
+	return nil
+}
+
 func ConditionWithOperatorUnity(input string, operator string, langs *map[string]LangDictUnity, out *MappedMultilangCondition, data *JSONGameDataUnity) bool {
 	partSplit := strings.Split(input, operator)
-	rawElement := ElementFromCode(partSplit[0])
-	if rawElement == -1 {
+	rawElement := ElementFromCodeUnity(partSplit[0])
+	if rawElement == nil {
 		return false
 	}
+	actualElement := -1
 	out.Element = partSplit[0]
 	out.Value, _ = strconv.Atoi(partSplit[1])
 	for _, lang := range LanguagesUnity {
-		langStr := (*langs)[lang].Texts[rawElement]
+		langStr, ok := (*langs)[lang].Texts[rawElement[0]]
+		// TODO remove this mess when 3.2 is out for some time, else ambiguity. And we have hardcoded size 2 here, which is also not really stable.
+		if !ok {
+			langStr, ok = (*langs)[lang].Texts[rawElement[1]]
+			if !ok {
+				log.Fatalf("Could not find condition translation for %s", partSplit[1])
+			} else {
+				actualElement = rawElement[1]
+			}
+		} else {
+			actualElement = rawElement[0]
+		}
 
 		if lang == "en" {
 			if langStr == "()" {
@@ -119,14 +179,14 @@ func ConditionWithOperatorUnity(input string, operator string, langs *map[string
 			}
 		}
 
-		switch rawElement {
-		case 837224: // %1 replace
+		switch actualElement {
+		case 1096588: // %1 replace
 			intVal, _ := strconv.Atoi(partSplit[1])
 			langStr = strings.ReplaceAll(langStr, "%1", fmt.Sprint(intVal+1))
-		case 335357: // anderes gebiet als %1
+		case 1092470: // anderes gebiet als %1
 			langStr = strings.ReplaceAll(langStr, "%1", (*langs)[lang].Texts[data.areas[out.Value].NameId])
-		case 637212: // reittier %1
-		case 644231:
+		case 1094822: // reittier %1
+		case 1095105:
 			langStr = strings.ReplaceAll(langStr, "%1", (*langs)[lang].Texts[data.Mounts[out.Value].NameId])
 		}
 

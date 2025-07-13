@@ -61,10 +61,17 @@ func TestElementValidity(t *testing.T) {
 	elementCodes := []string{"cs", "ci", "cv", "ca", "cc", "cw", "pk", "PK", "pl", "cm", "cp", "po", "pf", "pa", "of", "pz"}
 
 	for _, code := range elementCodes {
-		num := ElementFromCode(code)
-		_, ok := TestingLangs["en"].Texts[num]
-		if !ok {
+		num := ElementFromCodeUnity(code)
+		if num == nil {
 			t.Errorf("Could not find translations for %s", code)
+		}
+		_, ok := TestingLangs["en"].Texts[num[0]]
+		if !ok {
+			// ... TODO make it stop :/
+			_, ok := TestingLangs["en"].Texts[num[1]]
+			if !ok {
+				t.Errorf("Could not find translations for %s", code)
+			}
 		}
 	}
 }

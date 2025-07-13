@@ -57,7 +57,7 @@ func MapRecipes(data *JSONGameData) []MappedMultilangRecipe {
 		var mappedRecipe MappedMultilangRecipe
 		mappedRecipe.ResultId = recipe.Id
 		mappedRecipe.Entries = make([]MappedMultilangRecipeEntry, ingredientCount)
-		for i := 0; i < ingredientCount; i++ {
+		for i := range ingredientCount {
 			var recipeEntry MappedMultilangRecipeEntry
 			recipeEntry.ItemId = recipe.IngredientIds[i]
 			recipeEntry.Quantity = recipe.Quantities[i]
@@ -146,7 +146,7 @@ func MapAlmanax(data *JSONGameData, langs *map[string]LangDict) []MappedMultilan
 			}
 		}
 		if !found {
-			log.Fatalf("Could not find almanax calendar for NPC %d", questObjectiveNpc)
+			log.Printf("Could not find almanax calendar for NPC %d", questObjectiveNpc)
 		}
 
 		var mappedNPCAlmanax MappedMultilangNPCAlmanax

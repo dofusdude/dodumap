@@ -37,7 +37,7 @@ func ParseRawDataPartUnityMulti[T HasId, A any](fileSource string, dir string, s
 				Type struct {
 					Class string `json:"class"`
 				}
-				Data interface{} // depends on class
+				Data any // depends on class
 			} `json:"RefIds"`
 		} `json:"references"`
 	}
@@ -119,7 +119,7 @@ func ParseRawDataPartUnity[T HasId](fileSource string, result chan map[int]T, di
 				Type struct {
 					Class string `json:"class"`
 				}
-				Data interface{} // depends on class
+				Data any // depends on class
 			} `json:"RefIds"`
 		} `json:"references"`
 	}

@@ -2,7 +2,6 @@ package dodumap
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/log"
@@ -185,18 +184,17 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 		mappedNPCAlmanax.OptimalLevel = optimalLevel
 		mappedNPCAlmanax.Duration = duration
 		mappedNPCAlmanax.ExperienceRatio = experienceRatio
+		mappedNPCAlmanax.DatesRule = currAlm.Dates.Array
 
-		mappedNPCAlmanax.OfferingReceiver = (*langs)["en"].Texts[quest.NameId][13:] // remove "Offering to ". The name is the same in all languages.
+		// remove "Offering to ". The name is the same in all languages.
+		mappedNPCAlmanax.OfferingReceiver = (*langs)["en"].Texts[quest.NameId][13:]
+
 		itemNames := make(map[string]string)
 		mappedNPCAlmanax.Bonus = make(map[string]string)
 		mappedNPCAlmanax.BonusType = make(map[string]string)
 		for _, lang := range LanguagesUnity {
 			itemNames[lang] = (*langs)[lang].Texts[item.NameId]
-			numId, err := strconv.Atoi(currAlm.DescId)
-			if err != nil {
-				log.Fatal("Could not convert", "err", err, "val", currAlm.DescId)
-			}
-			mappedNPCAlmanax.Bonus[lang] = (*langs)[lang].Texts[numId]
+			mappedNPCAlmanax.Bonus[lang] = (*langs)[lang].Texts[currAlm.DescId]
 			mappedNPCAlmanax.BonusType[lang] = (*langs)[lang].Texts[currAlm.NameId]
 
 			mappedNPCAlmanax.Bonus[lang] = strings.ReplaceAll(mappedNPCAlmanax.Bonus[lang], "<b>", "")
@@ -225,7 +223,7 @@ func MapRecipesUnity(data *JSONGameDataUnity) []MappedMultilangRecipe {
 		var mappedRecipe MappedMultilangRecipe
 		mappedRecipe.ResultId = recipe.Id
 		mappedRecipe.Entries = make([]MappedMultilangRecipeEntry, ingredientCount)
-		for i := 0; i < ingredientCount; i++ {
+		for i := range ingredientCount {
 			var recipeEntry MappedMultilangRecipeEntry
 			recipeEntry.ItemId = recipe.IngredientIds.Array[i]
 			recipeEntry.Quantity = recipe.Quantities.Array[i]

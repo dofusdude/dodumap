@@ -28,6 +28,7 @@ type MappedMultilangItemUnity struct {
 type MappedMultilangNPCAlmanaxUnity struct {
 	OfferingReceiver string   `json:"offeringReceiver"`
 	Days             []string `json:"days"`
+	DatesRule        []string `json:"datesRule"` // NOTE: Since 3.2
 	Offering         struct {
 		ItemId         int               `json:"itemId"`
 		ItemCategoryId int               `json:"itemCategoryId"`
@@ -428,11 +429,11 @@ func (i JSONGameQuestCategoryUnity) GetID() int {
 
 type JSONGameAlamanaxCalendarUnity struct {
 	Id         int                        `json:"id"`
-	DescId     string                     `json:"descId"` // int
+	DescId     int                        `json:"descId"`
 	NameId     int                        `json:"nameId"`
 	NpcId      int                        `json:"npcId"`
 	BonusesIds JSONGameUnityAnkamaIdArray `json:"bonusesIds"`
-	// Dates      *JSONGameUnityArray[string] `json:"dates"` // NOTE: Added with 3.2. Keep optional to support also <3.2
+	Dates      JSONGameUnityArray[string] `json:"dates"`
 }
 
 func (i JSONGameAlamanaxCalendarUnity) GetID() int {

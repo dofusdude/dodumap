@@ -210,8 +210,8 @@ func TestParseConditionLimboWand(t *testing.T) {
 
 	expected := `and
   and
-    Aktionsp. (AP) < 12
-    Bewegungsp. (BP) < 6
+    AP < 12
+    BP < 6
   Weisheit > 99
 `
 
@@ -476,7 +476,7 @@ func TestParseNumSpellNameFormatterMinMax(t *testing.T) {
 
 func TestParseNumSpellNameFormatterSpellDiceNum(t *testing.T) {
 	input := "Zauberwurf: #1"
-	diceNum := 12548
+	diceNum := 8295
 	diceSide := 0
 	value := 0
 	frNumSigned := 0

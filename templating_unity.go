@@ -200,9 +200,9 @@ func ConditionWithOperatorUnity(input string, operator string, langs *map[string
 }
 
 func NumSpellFormatterUnity(input string, lang string, gameData *JSONGameDataUnity, langs *map[string]LangDictUnity, diceNum *int, diceSide *int, value *int, effectNameId int, numIsSpell bool, useDice bool, frNumSigned *int, frSideSigned *int) (string, int) {
-	diceNumIsSpellId := *diceNum > 12000 || numIsSpell
-	diceSideIsSpellId := *diceSide > 12000
-	valueIsSpellId := *value > 12000
+	diceNumIsSpellId := *diceNum > 8000 || numIsSpell
+	diceSideIsSpellId := *diceSide > 8000
+	valueIsSpellId := *value > 8000
 
 	onlyNoMinMax := 0
 

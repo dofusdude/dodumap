@@ -186,7 +186,7 @@ func ParseRawDataUnity(dir string) *JSONGameDataUnity {
 	}()
 	go func() {
 		possibleEffectInstance := "EffectInstanceDice"
-		mountLookup := ParseRawDataPartUnityMulti[JSONGameMountUnityRaw, JSONGameItemPossibleEffectUnity]("mounts.json", dir, "Mounts", &possibleEffectInstance)
+		mountLookup := ParseRawDataPartUnityMulti[JSONGameMountUnityRaw, JSONGameItemPossibleEffectUnity]("mounts.json", dir, "MountData", &possibleEffectInstance)
 		mounts := make(map[int]JSONGameMountUnity)
 		for _, mount := range mountLookup.AnkamaId {
 			mappedPossibleEffects := make([]*JSONGameItemPossibleEffectUnity, 0)
@@ -250,7 +250,7 @@ func ParseRawDataUnity(dir string) *JSONGameDataUnity {
 	}()
 	go func() {
 		possibleEffectInstance := "EffectInstanceDice"
-		setLookup := ParseRawDataPartUnityMulti[JSONGameSetUnityRaw, JSONGameItemPossibleEffectUnity]("item_sets.json", dir, "ItemSets", &possibleEffectInstance)
+		setLookup := ParseRawDataPartUnityMulti[JSONGameSetUnityRaw, JSONGameItemPossibleEffectUnity]("item_sets.json", dir, "ItemSetData", &possibleEffectInstance)
 		sets := make(map[int]JSONGameSetUnity)
 		for _, set := range setLookup.AnkamaId {
 			mappedPossibleEffects := make([][]*JSONGameItemPossibleEffectUnity, 0)

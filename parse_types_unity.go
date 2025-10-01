@@ -122,7 +122,7 @@ type JSONGameItemUnityRaw struct {
 	EvolutiveEffectIds     JSONGameUnityAnkamaIdArray `json:"evolutiveEffectIds"`
 	DropMonsterIds         JSONGameUnityAnkamaIdArray `json:"dropMonsterIds"`
 	ItemSetId              int                        `json:"itemSetId"`
-	Criteria               string                     `json:"criteria"`
+	Criterions             string                     `json:"criterions"`
 	CriticalHitBonus       int                        `json:"criticalHitBonus"`
 	MaxCastPerTurn         int                        `json:"maxCastPerTurn"`
 	ApCost                 int                        `json:"apCost"`
@@ -149,7 +149,7 @@ type JSONGameItemUnity struct {
 	EvolutiveEffectIds     JSONGameUnityAnkamaIdArray         `json:"evolutiveEffectIds"`
 	DropMonsterIds         JSONGameUnityAnkamaIdArray         `json:"dropMonsterIds"`
 	ItemSetId              int                                `json:"itemSetId"`
-	Criteria               string                             `json:"criteria"`
+	Criterions             string                             `json:"criterions"`
 	CriticalHitBonus       int                                `json:"criticalHitBonus"`
 	MaxCastPerTurn         int                                `json:"maxCastPerTurn"`
 	ApCost                 int                                `json:"apCost"`
@@ -172,7 +172,7 @@ func (i *JSONGameItemUnityRaw) Merge(other []*JSONGameItemPossibleEffectUnity) J
 		EvolutiveEffectIds:     i.EvolutiveEffectIds,
 		DropMonsterIds:         i.DropMonsterIds,
 		ItemSetId:              i.ItemSetId,
-		Criteria:               i.Criteria,
+		Criterions:             i.Criterions,
 		CriticalHitBonus:       i.CriticalHitBonus,
 		CriticalHitProbability: i.CriticalHitProbability,
 		ApCost:                 i.ApCost,

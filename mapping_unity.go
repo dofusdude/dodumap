@@ -89,8 +89,8 @@ func MapItemsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []M
 			}
 		}
 
-		if len(item.Criteria) != 0 && mappedItems[idx].Type.Name["de"] != "Verwendbarer Temporis-Gegenstand" { // TODO Temporis got some weird conditions
-			mappedItems[idx].Conditions = ParseConditionUnity(item.Criteria, langs, data)
+		if len(item.Criterions) != 0 && mappedItems[idx].Type.Name["de"] != "Verwendbarer Temporis-Gegenstand" { // TODO Temporis got some weird conditions
+			mappedItems[idx].Conditions = ParseConditionUnity(item.Criterions, langs, data)
 		}
 	}
 

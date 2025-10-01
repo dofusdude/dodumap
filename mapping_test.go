@@ -210,8 +210,8 @@ func TestParseConditionLimboWand(t *testing.T) {
 
 	expected := `and
   and
-    Aktionspunkte < 12
-    Bewegungspunkte < 6
+    AP < 12
+    BP < 6
   Weisheit > 99
 `
 

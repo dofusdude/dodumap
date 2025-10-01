@@ -114,9 +114,9 @@ func ElementFromCodeUnity(codeUndef string) []int {
 	case "pl":
 		return []int{1096588} // "Be level {0} or higher"
 	case "cm":
-		return []int{501874, 1143881} // "Movement Points (MP)" TODO one of them vanishes
+		return []int{864716} // "Movement Points"
 	case "cp":
-		return []int{501948, 1143880} // "Action Points (AP)" TODO one of them vanished
+		return []int{864704} // "Action Points"
 	case "po":
 		return []int{1092470} // "Different area to: {0}"
 	case "pf":

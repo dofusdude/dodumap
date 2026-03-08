@@ -504,7 +504,6 @@ type JSONGameDataUnity struct {
 	spells    map[int]JSONGameSpellUnity
 	//spellTypes       map[int]JSONGameSpellType
 	areas            map[int]JSONGameAreaUnity
-	Mounts           map[int]JSONGameMountUnity
 	classes          map[int]JSONGameBreedUnity
 	MountFamilys     map[int]JSONGameMountFamilyUnity
 	npcs             map[int]JSONGameNPCUnity

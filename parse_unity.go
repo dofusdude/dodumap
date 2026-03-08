@@ -162,8 +162,6 @@ func ParseRawDataUnity(dir string) *JSONGameDataUnity {
 	spellsChan := make(chan map[int]JSONGameSpellUnity)
 	//spellTypesChan := make(chan map[int]JSONGameSpellType)
 	areasChan := make(chan map[int]JSONGameAreaUnity)
-	mountsChan := make(chan map[int]JSONGameMountUnity)
-
 	breedsChan := make(chan map[int]JSONGameBreedUnity)
 	titlesChan := make(chan map[int]JSONGameTitleUnity)
 	questsChan := make(chan map[int]JSONGameQuestUnity)
@@ -178,30 +176,6 @@ func ParseRawDataUnity(dir string) *JSONGameDataUnity {
 	}()
 	go func() {
 		ParseRawDataPartUnity("breeds.json", breedsChan, dir)
-	}()
-	go func() {
-		possibleEffectInstance := "EffectInstanceDice"
-		mountLookup := ParseRawDataPartUnityMulti[JSONGameMountUnityRaw, JSONGameItemPossibleEffectUnity]("mounts.json", dir, "MountData", &possibleEffectInstance)
-		mounts := make(map[int]JSONGameMountUnity)
-		for _, mount := range mountLookup.AnkamaId {
-			mappedPossibleEffects := make([]*JSONGameItemPossibleEffectUnity, 0)
-			for _, possibleEffectRef := range mount.Effects.Array {
-				var possibleEffect *JSONGameItemPossibleEffectUnity = nil
-				if possibleEffectRef.Ref != "-2" {
-					res, err := strconv.ParseInt(possibleEffectRef.Ref, 10, 64)
-					if err != nil {
-						log.Fatal("Mount parsing", "err", err)
-					}
-					existingEffect := mountLookup.Ref[res]
-					possibleEffect = &existingEffect
-				}
-				mappedPossibleEffects = append(mappedPossibleEffects, possibleEffect)
-			}
-			mergedMount := mount.Merge(mappedPossibleEffects)
-			mounts[mount.Id] = mergedMount
-		}
-		mountsChan <- mounts
-		return
 	}()
 	go func() {
 		ParseRawDataPartUnity("areas.json", areasChan, dir)
@@ -322,9 +296,6 @@ func ParseRawDataUnity(dir string) *JSONGameDataUnity {
 
 	data.areas = <-areasChan
 	close(areasChan)
-
-	data.Mounts = <-mountsChan
-	close(mountsChan)
 
 	data.classes = <-breedsChan
 	close(breedsChan)

@@ -187,7 +187,6 @@ func ConditionWithOperatorUnity(input string, operator string, langs *map[string
 			langStr = strings.ReplaceAll(langStr, "%1", (*langs)[lang].Texts[data.areas[out.Value].NameId])
 		case 1094822: // reittier %1
 		case 1095105:
-			langStr = strings.ReplaceAll(langStr, "%1", (*langs)[lang].Texts[data.Mounts[out.Value].NameId])
 		}
 
 		out.Templated[lang] = langStr

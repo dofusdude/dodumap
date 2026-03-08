@@ -97,42 +97,6 @@ func MapItemsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []M
 	return mappedItems
 }
 
-func MapMountsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []MappedMultilangMount {
-	var mappedMounts []MappedMultilangMount
-	for _, mount := range data.Mounts {
-		var mappedMount MappedMultilangMount
-		mappedMount.AnkamaId = mount.Id
-		mappedMount.FamilyId = mount.FamilyId
-		mappedMount.Name = make(map[string]string)
-		mappedMount.FamilyName = make(map[string]string)
-
-		for _, lang := range LanguagesUnity {
-			mappedMount.Name[lang] = (*langs)[lang].Texts[mount.NameId]
-			mappedMount.FamilyName[lang] = (*langs)[lang].Texts[data.MountFamilys[mount.FamilyId].NameId]
-		}
-
-		effectsArr := make([][]*JSONGameItemPossibleEffectUnity, 1)
-		effectsArr[0] = mount.Effects
-		allEffectResult := ParseEffectsUnity(data, effectsArr, langs)
-		if len(allEffectResult) > 0 {
-			for _, effect := range allEffectResult[0] {
-				if effect == nil {
-					continue
-				}
-				mappedMount.Effects = append(mappedMount.Effects, *effect)
-			}
-		}
-
-		mappedMounts = append(mappedMounts, mappedMount)
-	}
-
-	if len(mappedMounts) == 0 {
-		return nil
-	}
-
-	return mappedMounts
-}
-
 func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []MappedMultilangNPCAlmanaxUnity {
 	var mappedAlmanax []MappedMultilangNPCAlmanaxUnity
 

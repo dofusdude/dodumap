@@ -165,8 +165,6 @@ func ParseRawDataUnity(dir string) *JSONGameDataUnity {
 	mountsChan := make(chan map[int]JSONGameMountUnity)
 
 	breedsChan := make(chan map[int]JSONGameBreedUnity)
-	mountFamilyChan := make(chan map[int]JSONGameMountFamilyUnity)
-
 	titlesChan := make(chan map[int]JSONGameTitleUnity)
 	questsChan := make(chan map[int]JSONGameQuestUnity)
 	questStepsChan := make(chan map[int]JSONGameQuestStepUnity)
@@ -177,9 +175,6 @@ func ParseRawDataUnity(dir string) *JSONGameDataUnity {
 
 	go func() {
 		ParseRawDataPartUnity("npcs.json", npcsChan, dir)
-	}()
-	go func() {
-		ParseRawDataPartUnity("mount_family.json", mountFamilyChan, dir)
 	}()
 	go func() {
 		ParseRawDataPartUnity("breeds.json", breedsChan, dir)
@@ -333,9 +328,6 @@ func ParseRawDataUnity(dir string) *JSONGameDataUnity {
 
 	data.classes = <-breedsChan
 	close(breedsChan)
-
-	data.MountFamilys = <-mountFamilyChan
-	close(mountFamilyChan)
 
 	data.titles = <-titlesChan
 	close(titlesChan)

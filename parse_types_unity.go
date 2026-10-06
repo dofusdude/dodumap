@@ -441,7 +441,7 @@ func (i JSONGameAlamanaxCalendarUnity) GetID() int {
 }
 
 type JSONGameItemPossibleEffectUnity struct {
-	EffectId     int `json:"effectId"`
+	EffectId     int `json:"actionId"` // was "effectId" before 3.7
 	MinimumValue int `json:"diceNum"`
 	MaximumValue int `json:"diceSide"`
 	Value        int `json:"value"`

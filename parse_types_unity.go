@@ -28,7 +28,7 @@ type MappedMultilangItemUnity struct {
 type MappedMultilangNPCAlmanaxUnity struct {
 	OfferingReceiver string   `json:"offeringReceiver"`
 	Days             []string `json:"days"`
-	DatesRule        []string `json:"datesRule"` // NOTE: Since 3.2
+	DatesRule        []string `json:"-"` // NOTE: Since 3.2, resolved into Days
 	Offering         struct {
 		ItemId         int               `json:"itemId"`
 		ItemCategoryId int               `json:"itemCategoryId"`

@@ -5,8 +5,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 var TestingLangs map[string]LangDictUnity
@@ -518,5 +520,27 @@ func TestParseNumSpellNameFormatterMissingWhite(t *testing.T) {
 	output, _ := NumSpellFormatterUnity(input, "de", TestingData, &TestingLangs, &diceNum, &diceSide, &value, 0, false, false, &frNumSigned, &frNumSigned)
 	if output != "1 level" {
 		t.Errorf("output is not as expected: %s", output)
+	}
+}
+
+func TestAlmanaxDays(t *testing.T) {
+	calendars := map[int]JSONGameAlamanaxCalendarUnity{
+		1: {Id: 1, NpcId: 10, Dates: JSONGameUnityArray[string]{Array: []string{"11/10/*"}}},
+		2: {Id: 2, NpcId: 20, Dates: JSONGameUnityArray[string]{Array: []string{"12/10/*"}}},
+		3: {Id: 3, NpcId: 30, Dates: JSONGameUnityArray[string]{Array: []string{"13/10/*"}}},
+		4: {Id: 4, NpcId: 40, Dates: JSONGameUnityArray[string]{Array: []string{"14/10/2025", "12/10/2026"}}}, // moving holiday
+		5: {Id: 5, NpcId: 50, Dates: JSONGameUnityArray[string]{Array: []string{"*/10/*", "13/10/*"}}},        // seasonal bonus
+	}
+
+	from := time.Date(2026, 10, 11, 0, 0, 0, 0, time.UTC)
+	days := AlmanaxDays(calendars, from, from.AddDate(0, 0, 2))
+
+	expected := map[int][]string{
+		10: {"2026-10-11"},
+		40: {"2026-10-12"},
+		30: {"2026-10-13"},
+	}
+	if !reflect.DeepEqual(days, expected) {
+		t.Errorf("expected %v, got %v", expected, days)
 	}
 }

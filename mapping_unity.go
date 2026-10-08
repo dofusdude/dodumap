@@ -3,6 +3,7 @@ package dodumap
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/log"
 )
@@ -97,8 +98,47 @@ func MapItemsUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []M
 	return mappedItems
 }
 
+// AlmanaxDays resolves the almanax calendar rules to the concrete days of each NPC in [from, to].
+// Every day has one yearly rule "DD/MM/*". Rules with a fixed year "DD/MM/YYYY" are moving holidays
+// and override the yearly rule of that day. Calendars with more than one yearly rule are seasonal
+// bonuses and do not decide the offering of a day.
+func AlmanaxDays(calendars map[int]JSONGameAlamanaxCalendarUnity, from time.Time, to time.Time) map[int][]string {
+	yearly := make(map[string]int)
+	fixed := make(map[string]int)
+	for _, cal := range calendars {
+		for _, rule := range cal.Dates.Array {
+			if strings.HasSuffix(rule, "/*") {
+				if len(cal.Dates.Array) == 1 {
+					yearly[rule] = cal.NpcId
+				}
+			} else {
+				fixed[rule] = cal.NpcId
+			}
+		}
+	}
+
+	days := make(map[int][]string)
+	for day := from; !day.After(to); day = day.AddDate(0, 0, 1) {
+		npcId, ok := fixed[day.Format("02/01/2006")]
+		if !ok {
+			npcId, ok = yearly[day.Format("02/01")+"/*"]
+		}
+		if !ok {
+			log.Warn("no almanax found", "day", day.Format("2006-01-02"))
+			continue
+		}
+		days[npcId] = append(days[npcId], day.Format("2006-01-02"))
+	}
+
+	return days
+}
+
 func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) []MappedMultilangNPCAlmanaxUnity {
 	var mappedAlmanax []MappedMultilangNPCAlmanaxUnity
+
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	almanaxDays := AlmanaxDays(data.almanaxCalendars, today, today.AddDate(1, 0, 0))
 
 	for _, almCat := range data.questCategories[31].QuestIds.Array {
 		quest := data.quests[almCat]
@@ -149,6 +189,7 @@ func MapAlmanaxUnity(data *JSONGameDataUnity, langs *map[string]LangDictUnity) [
 		mappedNPCAlmanax.Duration = duration
 		mappedNPCAlmanax.ExperienceRatio = experienceRatio
 		mappedNPCAlmanax.DatesRule = currAlm.Dates.Array
+		mappedNPCAlmanax.Days = almanaxDays[questObjectiveNpc]
 
 		// remove "Offering to ". The name is the same in all languages.
 		mappedNPCAlmanax.OfferingReceiver = (*langs)["en"].Texts[quest.NameId][13:]

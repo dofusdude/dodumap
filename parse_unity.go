@@ -554,30 +554,7 @@ func removeUnsupportedExpressionsUnity(node *ConditionTreeNode, langs *map[strin
 }
 
 func ParseConditionUnity(condition string, langs *map[string]LangDictUnity, data *JSONGameDataUnity) *ConditionTreeNodeMapped {
-	if condition == "" || (!strings.Contains(condition, "&") && !strings.Contains(condition, "|") && !strings.Contains(condition, "<") && !strings.Contains(condition, ">")) {
-		return nil
-	}
-
-	// parse into ast
-	tree := ParseExpression(condition)
-
-	// strip tree to only known conditions
-	tree = removeUnsupportedExpressionsUnity(tree, langs, data)
-	tree = simplifyTree(tree)
-
-	if tree == nil {
-		return nil
-	}
-
-	// convert to mapped tree
-	mappedTree := new(*ConditionTreeNodeMapped)
-	buildMappedConditionTreeUnity(mappedTree, tree, langs, data)
-
-	if *mappedTree == nil {
-		log.Fatal("mapped tree is nil")
-	}
-
-	return *mappedTree
+	return mapConditionTreeUnity(parseConditionExpression(condition), langs, data)
 }
 
 func buildMappedConditionTreeUnity(out **ConditionTreeNodeMapped, root *ConditionTreeNode, langs *map[string]LangDictUnity, data *JSONGameDataUnity) {

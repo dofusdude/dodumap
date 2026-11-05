@@ -1,11 +1,24 @@
 package dodumap
 
 type MappedMultilangCondition struct {
-	Element   string            `json:"element"`
-	ElementId int               `json:"element_id"`
-	Operator  string            `json:"operator"`
-	Value     int               `json:"value"`
-	Templated map[string]string `json:"templated"`
+	StringValue        string              `json:"string_value,omitempty"`
+	ValueLabel         string              `json:"value_label,omitempty"`
+	Kind               string              `json:"kind,omitempty"`
+	Unit               string              `json:"unit,omitempty"`
+	SecondaryReference *ConditionReference `json:"secondary_reference,omitempty"`
+	Reference          *ConditionReference `json:"reference,omitempty"`
+	Quantity           *int                `json:"quantity,omitempty"`
+	ServerExpression   string              `json:"server_expression,omitempty"`
+	Element            string              `json:"element"`
+	ElementId          int                 `json:"element_id"`
+	Operator           string              `json:"operator"`
+	Value              int                 `json:"value"`
+	Templated          map[string]string   `json:"templated"`
+}
+
+type ConditionReference struct {
+	AnkamaID int               `json:"ankama_id"`
+	Name     map[string]string `json:"name"`
 }
 
 // NodeType defines the type of a node - either an operator or an operand

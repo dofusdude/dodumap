@@ -137,7 +137,10 @@ func ElementFromCodeUnity(codeUndef string) []int {
 }
 
 func ConditionWithOperatorUnity(input string, operator string, langs *map[string]LangDictUnity, out *MappedMultilangCondition, data *JSONGameDataUnity) bool {
-	partSplit := strings.Split(input, operator)
+	partSplit := strings.SplitN(input, operator, 2)
+	if len(partSplit) != 2 {
+		return false
+	}
 	rawElement := ElementFromCodeUnity(partSplit[0])
 	if rawElement == nil {
 		return false
@@ -149,9 +152,12 @@ func ConditionWithOperatorUnity(input string, operator string, langs *map[string
 		langStr, ok := (*langs)[lang].Texts[rawElement[0]]
 		// TODO remove this mess when 3.2 is out for some time, else ambiguity. And we have hardcoded size 2 here, which is also not really stable.
 		if !ok {
+			if len(rawElement) < 2 {
+				return false
+			}
 			langStr, ok = (*langs)[lang].Texts[rawElement[1]]
 			if !ok {
-				log.Fatalf("Could not find condition translation for %s", partSplit[1])
+				return false
 			} else {
 				actualElement = rawElement[1]
 			}
@@ -174,6 +180,7 @@ func ConditionWithOperatorUnity(input string, operator string, langs *map[string
 			if foundKey {
 				out.ElementId = key.(int)
 			} else {
+				out.ElementId = PersistedElements.NextId
 				PersistedElements.Entries.Put(PersistedElements.NextId, keySanitized)
 				PersistedElements.NextId++
 			}

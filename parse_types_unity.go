@@ -495,13 +495,14 @@ func (i JSONGameAreaUnity) GetID() int {
 }
 
 type JSONGameDataUnity struct {
-	Items     map[int]JSONGameItemUnity
-	Sets      map[int]JSONGameSetUnity
-	ItemTypes map[int]JSONGameItemTypeUnity
-	effects   map[int]JSONGameEffectUnity
-	bonuses   map[int]JSONGameBonusUnity
-	Recipes   map[int]JSONGameRecipeUnity
-	spells    map[int]JSONGameSpellUnity
+	ConditionReferences map[string]map[int]ConditionReference
+	Items               map[int]JSONGameItemUnity
+	Sets                map[int]JSONGameSetUnity
+	ItemTypes           map[int]JSONGameItemTypeUnity
+	effects             map[int]JSONGameEffectUnity
+	bonuses             map[int]JSONGameBonusUnity
+	Recipes             map[int]JSONGameRecipeUnity
+	spells              map[int]JSONGameSpellUnity
 	//spellTypes       map[int]JSONGameSpellType
 	areas            map[int]JSONGameAreaUnity
 	classes          map[int]JSONGameBreedUnity

@@ -15,12 +15,25 @@ var TestingLangs map[string]LangDictUnity
 var TestingData *JSONGameDataUnity
 
 func TestMain(m *testing.M) {
+	if os.Getenv("DODUMAP_TEST_UNIT_ONLY") == "1" {
+		os.Exit(m.Run())
+	}
 	path, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
 	dataPath := filepath.Join(path, "data")
+	if configured := os.Getenv("DODUMAP_TEST_DATA_DIR"); configured != "" {
+		dataPath = configured
+	}
 	TestingLangs = ParseRawLanguagesUnity(dataPath)
+	if os.Getenv("DODUMAP_TEST_CONDITIONS_ONLY") == "1" {
+		TestingData = &JSONGameDataUnity{}
+		if err := LoadPersistedElements(filepath.Join(path, "persistent"), "main", 3); err != nil {
+			log.Fatal(err)
+		}
+		os.Exit(m.Run())
+	}
 	TestingData = ParseRawDataUnity(dataPath)
 	err = LoadPersistedElements(filepath.Join(path, "persistent"), "main", 3)
 	if err != nil {
@@ -35,7 +48,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("testingData is nil")
 	}
 
-	m.Run()
+	os.Exit(m.Run())
 }
 
 // TODO not up-to-date anymore with unity?
@@ -159,8 +172,8 @@ func TestParseConditionSimple(t *testing.T) {
 	if condition.Value != 25 {
 		t.Errorf("value is not 25: %d", condition.Value)
 	}
-	if condition.Templated["de"] != "Stärke" {
-		t.Errorf("templated is not Stärke: %s", condition.Templated["de"])
+	if condition.Templated["de"] != "Zusätzliche Stärke" {
+		t.Errorf("templated is not Zusätzliche Stärke: %s", condition.Templated["de"])
 	}
 }
 
@@ -251,8 +264,8 @@ func TestParseAndConditionUnknowns(t *testing.T) {
 	toParse := "KEINE>80&JAU>40"
 	conditionTree := ParseConditionUnity(toParse, &TestingLangs, TestingData)
 
-	if conditionTree != nil {
-		t.Errorf("conditionTree is not nil: %s", printTreeToString(conditionTree, 0))
+	if conditionTree == nil || len(conditionTree.Children) != 2 || conditionTree.Children[0].Value.ServerExpression != "KEINE>80" || conditionTree.Children[1].Value.ServerExpression != "JAU>40" {
+		t.Fatal("unknown requirements must remain in tree")
 	}
 }
 

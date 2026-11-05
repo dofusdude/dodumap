@@ -7,10 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/charmbracelet/log"
 	"github.com/emirpasic/gods/maps/treebidimap"
@@ -315,58 +313,7 @@ func (n *ConditionTreeNode) AddChild(child *ConditionTreeNode) {
 }
 
 func ParseExpression(exp string) *ConditionTreeNode {
-	var stack []*ConditionTreeNode
-	var current *ConditionTreeNode
-	var operandBuilder strings.Builder
-
-	conditionOperators := []rune{'<', '>', '=', '!'}
-
-	for _, char := range exp {
-		if unicode.IsLetter(char) || unicode.IsDigit(char) || slices.Contains(conditionOperators, char) {
-			operandBuilder.WriteRune(char) // continue building operand
-		} else {
-			if operandBuilder.Len() > 0 {
-				// finalize and add the operand
-				if current != nil && current.Type == Operator {
-					current.AddChild(newNode(operandBuilder.String(), Operand))
-				} else {
-					current = newNode(operandBuilder.String(), Operand)
-				}
-				operandBuilder.Reset()
-			}
-
-			switch char {
-			case '(':
-				if current != nil {
-					stack = append(stack, current)
-				}
-				current = nil
-			case ')':
-				if len(stack) > 0 {
-					parent := stack[len(stack)-1]
-					stack = stack[:len(stack)-1]
-					parent.AddChild(current)
-					current = parent
-				}
-			case '&', '|': // expression operators
-				operator := newNode(string(char), Operator)
-				if current != nil {
-					operator.AddChild(current)
-				}
-				current = operator
-			}
-		}
-	}
-
-	if operandBuilder.Len() > 0 {
-		if current != nil && current.Type == Operator {
-			current.AddChild(newNode(operandBuilder.String(), Operand))
-		} else {
-			current = newNode(operandBuilder.String(), Operand)
-		}
-	}
-
-	return current
+	return parseConditionExpression(exp)
 }
 
 func atomicCondition(expression string, langs *map[string]LangDict, data *JSONGameData) (bool, MappedMultilangCondition) {
